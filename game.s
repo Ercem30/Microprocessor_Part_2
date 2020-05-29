@@ -16,12 +16,12 @@ _main:                             								      //     1016 -> column value
 		str  r7, [sp, #992]																	//
 		movs r7, #200																				//
 		str  r7, [sp, #1000]																//
-		add  r7, r7, #15																		//     16 -> is player dead?, T = 0
-		str  r7, [sp, #988]																	//     12 -> local counter
-		movs r7, #10                                        //     current state: f12
-		str  r7, [sp, #984] //load enemy 2 to RAM
-		add  r7, r7, #10
-		str  r7, [sp, #972]
+		add  r7, r7, #15																		//
+		str  r7, [sp, #988]																	//      24 -> direction buffer, 2
+		movs r7, #10                                        //      20 -> direction buffer, 1
+		str  r7, [sp, #984] //load enemy 2 to RAM           //      16 -> is player dead?, T = 0
+		add  r7, r7, #10                                    //      12 -> local counter
+		str  r7, [sp, #972]                                 //      current state: f12
 		movs r7, #50
 		str  r7, [sp, #980]
 		add  r7, r7, #15
@@ -29,9 +29,12 @@ _main:                             								      //     1016 -> column value
 		movs r7, #1
 		str  r7, [sp, #996] //enemy1 is alive
 		str  r7, [sp, #976] //enemy2 is alive
-		str  r7, [sp, #16]  //player is alive
+		str  r7, [sp, #16]  //player is alive,
+		str  r7, [sp, #20]  //1 means moves left
 		movs r7, #0
 		str  r7, [sp, #12]  //assign initial state of counter
+		str  r7, [sp, #24]  //0 means moves right
+
 
 		str	r3, [r0, #12]   //refresh the screen
 		str	r3, [r0, #0x10] //clear the screen
@@ -49,7 +52,7 @@ f2:   b collide            //check wall collision -> f7
 f7:   ldr r7, [sp, #1012]  //check if fire has expired
       cmp r7, #0
       beq update_fire      // -> f9
-f9:   b update_enemy       // -> f10
+f9:   b update_enemy       // -> f10 (update movement inside)
 f10:  b update_enemy_fire_jump  // -> f12
 f12:	b update_player_jump        // -> f4
 f4:		str	r3, [r0, #12]
@@ -286,6 +289,7 @@ b show_enemy
 //-------------------------------------------------------------
 update_enemy:
     ldr r2, [sp, #12]   //counter
+		b move_enemy
 update_enemy_cont:
     cmp r2, #0
 		beq up_en_1
@@ -498,7 +502,7 @@ up_pl_2:
 		ldr r5, [sp, #1016]
 		ldr r3, [sp, #976]
 		b update_chain_2
-		
+
 update_chain_2:
 		cmp r7, r5
 		bhs checkp1
@@ -553,7 +557,37 @@ lcun5:
 		add r2, r2, #1
 		b update_player_cont
 //------------------------------------------------------------
+move_enemy: //counter defined in r2
+		ldr r1, [sp, #24]
+		ldr r7, [sp, #980]
+		cmp r1, #0
+		beq move_enemy_right
+		cmp r1, #1
+		beq move_enemy_left
+		b update_enemy_cont
 
+move_enemy_right:
+		add r7, r7, #1
+		str r7, [sp, #980]
+		cmp r7, #250
+		bhs assign_1
+		b update_enemy_cont
+move_enemy_left:
+		sub r7, r7, #1
+		str r7, [sp, #980]
+		cmp r7, #20
+		bls assign_0
+		b update_enemy_cont
+
+assign_0:
+		movs r1, #0
+		str  r1, [sp, #24]
+		b update_enemy_cont
+assign_1:
+		movs r1, #1
+		str  r1, [sp, #24]
+		b update_enemy_cont
+//------------------------------------------------------------
 .balign 4
 delay_constant:  .word 15000
 width:           .word 310
