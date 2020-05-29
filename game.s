@@ -50,9 +50,7 @@ f7:   ldr r7, [sp, #1012]  //check if fire has expired
       cmp r7, #0
       beq update_fire      // -> f9
 f9:   b update_enemy       // -> f10
-f10:  ldr r7, [sp, #992]
-      cmp r7, #255
-      beq update_enemy_fire_jump  // -> f12
+f10:  b update_enemy_fire_jump  // -> f12
 f12:	b update_player_jump        // -> f4
 f4:		str	r3, [r0, #12]
       b main_loop
@@ -64,9 +62,7 @@ f3:		b show_enemy         // -> f8
 f8:   ldr r7, [sp, #1012]  //show fire
   		cmp r7, #0
   		bhi show_fire        // -> f5
-f5:   ldr r7, [sp, #992]
-			cmp r7, #255
-			bls show_enemy_fire_jump  // -> f11
+f5:   b show_enemy_fire_jump  // -> f11
 f11:  b delay                   // -> f6
 f6:   b f1
 //-------------------------------------------------------------
@@ -171,7 +167,7 @@ show_charater:
 
 player_cont:
 
-    ldr 	r1, [sp, #1020] 
+    ldr 	r1, [sp, #1020]
     ldr 	r2, [sp, #1016]
     str 	r1, [r0]
     str 	r2, [r0, #4]
@@ -243,17 +239,17 @@ en1:movs  r7, #0 //draw enemy 1
 		ldr 	r7, [sp, #1000]
     cmp   r5, #1
 		beq   enemy_cont
-		b lcun
+		b lcun1
 
 en2:movs  r7, #0  //draw enemy 2
    ldr   r5, [sp, #976] //is the enemy dead?
 	 ldr   r1, [sp, #984]
 	 ldr   r2, [sp, #980]
-	 ldr 	 r6, [sp, #984] //counter is used to draw x number of enemies
-	 ldr   r7, [sp, #980]   //x is the number of enemies loaded into ram
+	 ldr 	 r6, [sp, #984]
+	 ldr   r7, [sp, #980]
    cmp   r5, #1
 	 beq   enemy_cont
- 	 b lcun
+ 	 b lcun1
 
 enemy_cont:
 
@@ -279,7 +275,7 @@ ae:	add	r6, r6, #1
 		bne	be
 		movs r7, r2
 		str	r3, [r0, #12]
-lcun:
+lcun1:
     ldr r7, [sp, #12]
 		add r7, r7, #1
 		str r7, [sp, #12] //update counter
@@ -292,7 +288,7 @@ update_enemy:
 		ldr r5, [sp, #1000]
 
 		cmp r7, r5
-		bhs check1     //this part will be updated for multiple enemy condition
+		bhs check1
 		b f10
 check1:
 		add r5, r5, #30
@@ -324,12 +320,44 @@ kill_enemy:
 b f10
 //-------------------------------------------------------------
 show_enemy_fire:
-		ldr r5, [sp, #992] //row data
+    ldr  r4, [sp, #12]  //load counter
+enemy_fire_cont:
+		cmp   r4, #0
+		beq   f_en1
+		cmp   r4, #1
+		beq   f_en2
+		movs  r4, #0
+		str   r4, [sp, #12] //reset counter
+		b f11
+
+f_en1:
+		ldr  r5, [sp, #992] //row data
 		movs r7, r5
-		ldr r6, [sp, #988] //column data
-		add r7, r7, #1
-		str r7, [sp, #992]
-		movs r7, #0  //this part will be updated for multiple enemy fire
+		ldr  r6, [sp, #988] //column data
+		ldr  r1, [sp, #992]
+		cmp  r1, #255
+		bls  f_en1_fire
+		b lcun2
+f_en1_fire:
+  	add  r7, r7, #1
+		str  r7, [sp, #992]
+		movs r7, #0
+		b draw_fire_enemy
+
+f_en2:
+		ldr  r5, [sp, #972] //row data
+		movs r7, r5
+		ldr  r6, [sp, #968] //column data
+		ldr  r1, [sp, #972] //is enemy dead
+		cmp  r1, #255
+		bls  f_en2_fire
+		b lcun2
+f_en2_fire:
+		add  r7, r7, #1
+		str  r7, [sp, #972]
+		movs r7, #0
+		b draw_fire_enemy
+
 draw_fire_enemy:
 		str	r5, [r0]
 		str	r6, [r0, #4]
@@ -338,23 +366,65 @@ draw_fire_enemy:
 		sub r5, r5, #1
 		cmp r7, #4
 		bne draw_fire_enemy
+lcun2:
 		movs r7, #0
-		str	r3, [r0, #12]
-b f11
+		str r3, [r0, #12]
+		add r4, r4, #1  //increment counter
+b enemy_fire_cont
 //-------------------------------------------------------------
 update_enemy_fire:
+		ldr r4, [sp, #12]  //load counter
+
+up_en_fire_cont:
+		cmp r4, #0
+		beq uef1
+		cmp r4, #1
+		beq uef2
+		movs r4, #0
+		str r4, [sp, #12] //reset counter
+		b f12
+
+uef1:
+    ldr r7, [sp, #992]
+		cmp r7, #255
+		beq uef1_1
+		b lcun3
+uef1_1:
     ldr r7, [sp, #996]
-		cmp r7, #1
-		beq cont_update_fire_e
-		b f12          //going to be updated for multiple enemy
-cont_update_fire_e:
+		cmp r7, #1  //if enemy alive, update fire
+		beq up_fire_1
+		b lcun3
+up_fire_1:
 		ldr r5, [sp, #1004] //row data
 		ldr r6, [sp, #1000] //column data
 		add r6, r6, #15
     add r5, r5, #10
-		str r5, [sp, #992]
+		str r5, [sp, #992] //reset fire position to enemy position
 		str r6, [sp, #988]
-b f12
+		b lcun3
+
+uef2:
+	  ldr r7, [sp, #972]
+		cmp r7, #255
+		beq uef2_1
+		b lcun3
+uef2_1:
+    ldr r7, [sp, #976]
+		cmp r7, #1  //if enemy alive, update fire
+		beq up_fire_2
+		b lcun3
+up_fire_2:
+		ldr r5, [sp, #984] //row data
+		ldr r6, [sp, #980] //column data
+		add r6, r6, #15
+    add r5, r5, #10
+		str r5, [sp, #972] //reset fire position to enemy position
+		str r6, [sp, #968]
+		b lcun3
+
+lcun3:
+		add r4, r4, #1 //increment counter
+b up_en_fire_cont
 //-------------------------------------------------------------
 update_player:
 		ldr r6, [sp, #992] //fire position
@@ -367,7 +437,7 @@ update_player:
 		bhs checkp1
 		b f4
 checkp1:
-		add r5, r5, #12    //going to be updated for getting hit from any enemy
+		add r5, r5, #12
 		cmp r7, r5
 		bls checkp2
 		b f4
