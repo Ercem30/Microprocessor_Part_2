@@ -171,7 +171,7 @@ show_charater:
 
 player_cont:
 
-    ldr 	r1, [sp, #1020]
+    ldr 	r1, [sp, #1020] 
     ldr 	r2, [sp, #1016]
     str 	r1, [r0]
     str 	r2, [r0, #4]
@@ -249,8 +249,8 @@ en2:movs  r7, #0  //draw enemy 2
    ldr   r5, [sp, #976] //is the enemy dead?
 	 ldr   r1, [sp, #984]
 	 ldr   r2, [sp, #980]
-	 ldr 	 r6, [sp, #984]
-	 ldr   r7, [sp, #980]
+	 ldr 	 r6, [sp, #984] //counter is used to draw x number of enemies
+	 ldr   r7, [sp, #980]   //x is the number of enemies loaded into ram
    cmp   r5, #1
 	 beq   enemy_cont
  	 b lcun
@@ -292,7 +292,7 @@ update_enemy:
 		ldr r5, [sp, #1000]
 
 		cmp r7, r5
-		bhs check1
+		bhs check1     //this part will be updated for multiple enemy condition
 		b f10
 check1:
 		add r5, r5, #30
@@ -329,7 +329,7 @@ show_enemy_fire:
 		ldr r6, [sp, #988] //column data
 		add r7, r7, #1
 		str r7, [sp, #992]
-		movs r7, #0
+		movs r7, #0  //this part will be updated for multiple enemy fire
 draw_fire_enemy:
 		str	r5, [r0]
 		str	r6, [r0, #4]
@@ -346,7 +346,7 @@ update_enemy_fire:
     ldr r7, [sp, #996]
 		cmp r7, #1
 		beq cont_update_fire_e
-		b f12
+		b f12          //going to be updated for multiple enemy
 cont_update_fire_e:
 		ldr r5, [sp, #1004] //row data
 		ldr r6, [sp, #1000] //column data
@@ -367,7 +367,7 @@ update_player:
 		bhs checkp1
 		b f4
 checkp1:
-		add r5, r5, #12
+		add r5, r5, #12    //going to be updated for getting hit from any enemy
 		cmp r7, r5
 		bls checkp2
 		b f4
