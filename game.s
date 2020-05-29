@@ -9,7 +9,7 @@ _main:                             								      //     1016 -> column value
 		str  r2, [sp, #1016]               								  //      992 -> fire 1 pos, row
 		str  r1, [sp, #1020]              								  //      988 -> fire 2 pos, col
 		ldr	 r0, =0x40010000               							    //      984 -> enemy 2, row position
-    ldr  r3, =0xFFFFFF00                								//      980 -> enemy 2, col position
+    ldr  r3, color1               							      	//      980 -> enemy 2, col position
 		movs r7, #50                        								//      976 -> enemy 2, is dead
 		str  r7, [sp, #1004] //load enemy 1 to RAM          //      972 -> fire 2 pos, row
 		add  r7, r7, #10																		//      968 -> fire 2 pos, col
@@ -18,11 +18,11 @@ _main:                             								      //     1016 -> column value
 		str  r7, [sp, #1000]																//
 		add  r7, r7, #15																		//     16 -> is player dead?, T = 0
 		str  r7, [sp, #988]																	//     12 -> local counter
-		movs r7, #20                                        //     current state: f12
+		movs r7, #10                                        //     current state: f12
 		str  r7, [sp, #984] //load enemy 2 to RAM
 		add  r7, r7, #10
 		str  r7, [sp, #972]
-		movs r7, #100
+		movs r7, #50
 		str  r7, [sp, #980]
 		add  r7, r7, #15
 		str  r7, [sp, #968]
@@ -171,6 +171,7 @@ player_cont:
     ldr 	r2, [sp, #1016]
     str 	r1, [r0]
     str 	r2, [r0, #4]
+		ldr   r3, color1
     str	  r3, [r0, #8]
 
 		movs r4, #12
@@ -202,6 +203,7 @@ show_fire:
 draw_fire:
     str	r5, [r0]
     str	r6, [r0, #4]
+		ldr r3, color3
     str	r3, [r0, #8]
     add r7, r7, #1
     sub r5, r5, #1
@@ -255,6 +257,7 @@ enemy_cont:
 
 		str 	r6, [r0]
 		str 	r7, [r0, #4]
+		ldr   r3, color1
 		str	  r3, [r0, #8]
 
 		movs r4, #12
@@ -282,42 +285,77 @@ lcun1:
 b show_enemy
 //-------------------------------------------------------------
 update_enemy:
+    ldr r2, [sp, #12]   //counter
+update_enemy_cont:
+    cmp r2, #0
+		beq up_en_1
+		cmp r2, #1
+		beq up_en_2
+		b f10
+
+up_en_1:
 		ldr r6, [sp, #1012] //fire position
 		ldr r7, [sp, #1008]
 		ldr r4, [sp, #1004] //enemy position
 		ldr r5, [sp, #1000]
+		ldr r3, [sp, #996]  //is enemy dead
+		b update_chain
+up_en_2:
+		ldr r6, [sp, #1012] //fire position
+		ldr r7, [sp, #1008]
+		ldr r4, [sp, #984] //enemy position
+		ldr r5, [sp, #980]
+		ldr r3, [sp, #976]  //is enemy dead
+		b update_chain
 
+update_chain:
 		cmp r7, r5
 		bhs check1
-		b f10
+		b lcun4
 check1:
 		add r5, r5, #30
 		cmp r7, r5
 		bls check2
-		b f10
+		b lcun4
 check2:
 		cmp r6, r4
 		bhs check3
-		b f10
+		b lcun4
 check3:
 		add r4, r4, #12
 		cmp r6, r4
 		bls check4
-		b f10
+		b lcun4
 check4:
-		ldr r7, [sp, #996]
-		cmp r7, #1
+		cmp r3, #1
 		beq kill_enemy
-		b f10
+		b lcun4
+
 kill_enemy:
-		movs r2, #0
-		str r2, [sp, #996]
+		cmp r2, #0
+		beq kill1
+		cmp r2, #1
+		beq kill2
+		b f10
+
+kill1:
+		movs r1, #0
+		str r1, [sp, #996]
+		b lcun4_ld
+kill2:
+		movs r1, #0
+		str r1, [sp, #976]
+		b lcun4_ld
+
+lcun4_ld:
 		ldr r5, [sp, #1020] //row data
 		ldr r6, [sp, #1016] //column data
 		add r6, r6, #6
 		str r5, [sp, #1012]
 		str r6, [sp, #1008] //update fire
-b f10
+lcun4:
+		add r2, r2, #1
+		b update_enemy_cont
 //-------------------------------------------------------------
 show_enemy_fire:
     ldr  r4, [sp, #12]  //load counter
@@ -361,6 +399,7 @@ f_en2_fire:
 draw_fire_enemy:
 		str	r5, [r0]
 		str	r6, [r0, #4]
+		ldr r3, color2
 		str	r3, [r0, #8]
 		add r7, r7, #1
 		sub r5, r5, #1
@@ -368,6 +407,7 @@ draw_fire_enemy:
 		bne draw_fire_enemy
 lcun2:
 		movs r7, #0
+		ldr r3, color2
 		str r3, [r0, #12]
 		add r4, r4, #1  //increment counter
 b enemy_fire_cont
@@ -467,6 +507,9 @@ b f4
 //------------------------------------------------------------
 
 .balign 4
-delay_constant:  .word 10000
+delay_constant:  .word 15000
 width:           .word 310
 data:            .word 996
+color1:          .word 0xFFFFFF00
+color2:          .word 0xFFFF0000
+color3:          .word 0xFF00FF00
