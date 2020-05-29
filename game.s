@@ -176,7 +176,7 @@ player_cont:
 
 		movs r4, #12
 		add  r4, r4, r1
-		movs r5, #12
+		movs r5, #13
 		add  r5, r5, r2
 
 b:	add	r2, r2, #1
@@ -291,6 +291,8 @@ update_enemy_cont:
 		beq up_en_1
 		cmp r2, #1
 		beq up_en_2
+		movs r2, #0
+		str r2, [sp, #12]
 		b f10
 
 up_en_1:
@@ -299,16 +301,16 @@ up_en_1:
 		ldr r4, [sp, #1004] //enemy position
 		ldr r5, [sp, #1000]
 		ldr r3, [sp, #996]  //is enemy dead
-		b update_chain
+		b update_chain1
 up_en_2:
 		ldr r6, [sp, #1012] //fire position
 		ldr r7, [sp, #1008]
 		ldr r4, [sp, #984] //enemy position
 		ldr r5, [sp, #980]
 		ldr r3, [sp, #976]  //is enemy dead
-		b update_chain
+		b update_chain1
 
-update_chain:
+update_chain1:
 		cmp r7, r5
 		bhs check1
 		b lcun4
@@ -336,6 +338,8 @@ kill_enemy:
 		beq kill1
 		cmp r2, #1
 		beq kill2
+		movs r2, #0
+		str r2, [sp, #12]
 		b f10
 
 kill1:
@@ -467,43 +471,87 @@ lcun3:
 b up_en_fire_cont
 //-------------------------------------------------------------
 update_player:
+		ldr r2, [sp, #12]
+
+update_player_cont:
+		cmp r2, #0
+		beq up_pl_1
+	  cmp r2, #1
+		beq up_pl_2
+		movs r2, #0
+		str r2, [sp, #12]
+		b f4
+
+up_pl_1:
 		ldr r6, [sp, #992] //fire position
 		add r6, r6, #4
 		ldr r7, [sp, #988]
 		ldr r4, [sp, #1020] //player position
 		ldr r5, [sp, #1016]
-
+		ldr r3, [sp, #996]
+		b update_chain_2
+up_pl_2:
+		ldr r6, [sp, #972] //fire position
+		add r6, r6, #4
+		ldr r7, [sp, #968]
+		ldr r4, [sp, #1020] //player position
+		ldr r5, [sp, #1016]
+		ldr r3, [sp, #976]
+		b update_chain_2
+		
+update_chain_2:
 		cmp r7, r5
 		bhs checkp1
-		b f4
+		b lcun5
 checkp1:
 		add r5, r5, #12
 		cmp r7, r5
 		bls checkp2
-		b f4
+		b lcun5
 checkp2:
 		cmp r6, r4
 		bhs checkp3
-		b f4
+		b lcun5
 checkp3:
 		add r4, r4, #12
 		cmp r6, r4
 		bls checkp4
-		b f4
+		b lcun5
 checkp4:
-		ldr r7, [sp, #996]
-		cmp r7, #1
+		cmp r3, #1
 		beq kill_player
-		b f4
+		b lcun5
+
 kill_player:
+		cmp r2, #0
+		beq killp1
+		cmp r2, #1
+		beq killp2
 		movs r2, #0
-		str r2, [sp, #16]  //player is dead
+		str r2, [sp, #12]
+		b f4
+
+killp1:
+		movs r1, #0
+		str r1, [sp, #16]  //player is dead
 		ldr r5, [sp, #1004] //row data
 		ldr r6, [sp, #1000] //column data
 		add r6, r6, #15
 		str r5, [sp, #992]
 		str r6, [sp, #988] //update fire
-b f4
+		b lcun5
+killp2:
+		movs r1, #0
+		str r1, [sp, #16]  //player is dead
+		ldr r5, [sp, #984] //row data
+		ldr r6, [sp, #980] //column data
+		add r6, r6, #15
+		str r5, [sp, #972]
+		str r6, [sp, #968] //update fire
+		b lcun5
+lcun5:
+		add r2, r2, #1
+		b update_player_cont
 //------------------------------------------------------------
 
 .balign 4
