@@ -8,11 +8,13 @@ _main:                             								      //     1016 -> column value
 		sub  r2, r2, #6                   								  //      996 -> enemy 1, is dead? T = 0
 		str  r2, [sp, #1016]               								  //      992 -> fire 1 pos, row
 		str  r1, [sp, #1020]              								  //      988 -> fire 2 pos, col
-		ldr	 r0, =0x40010000               							    //      984 -> enemy 2, row position
-    ldr  r3, color1               							      	//      980 -> enemy 2, col position
-		movs r7, #50                        								//      976 -> enemy 2, is dead
-		str  r7, [sp, #1004] //load enemy 1 to RAM          //      972 -> fire 2 pos, row
-		add  r7, r7, #10																		//      968 -> fire 2 pos, col
+    b    ldr_r0_1                                       //			984 -> enemy 2, row position
+ret1:		                                                //			980 -> enemy 2, col position
+    b    ldr_r3_1                 							    		//      976 -> enemy 2, is dead
+ret2:							         						            			//      972 -> fire 2 pos, row
+		movs r7, #50                        								//      968 -> fire 2 pos, col
+		str  r7, [sp, #1004] //load enemy 1 to RAM          //
+		add  r7, r7, #10																		//
 		str  r7, [sp, #992]																	//
 		movs r7, #200																				//
 		str  r7, [sp, #1000]																//
@@ -157,47 +159,27 @@ cont_update_fire_p:
 		str r5, [sp, #1012]
 		str r6, [sp, #1008]
 b f9
-//-------------------------------------------------------------//jump point
+//-------------------------------------------------------------//1'st jump point
 show_enemy_fire_jump: b show_enemy_fire
 update_enemy_fire_jump: b update_enemy_fire
 update_player_jump: b update_player
+ldr_r0_1: b ldr_r0_2
+ldr_r3_1: b ldr_r3_2
 //-------------------------------------------------------------
 show_charater:
 		ldr   r5, [sp, #16] //is the enemy dead?
 		cmp   r5, #1
 		beq   player_cont
+		ldr r3, red
 		b f3
 
 player_cont:
-
     ldr 	r1, [sp, #1020]
     ldr 	r2, [sp, #1016]
-    str 	r1, [r0]
-    str 	r2, [r0, #4]
-		ldr   r3, color1
-    str	  r3, [r0, #8]
-
-		movs r4, #12
-		add  r4, r4, r1
-		movs r5, #13
-		add  r5, r5, r2
-
-b:	add	r2, r2, #1
-a:	add	r1, r1, #1
-		str	r1, [r0]
-		str	r2, [r0, #4]
-		str	r3, [r0, #8]
-
-		cmp	r1, r4
-		bne	a
-		ldr r1, [sp, #1020]
-		cmp	r2, r5
-		bne	b
-		ldr r2, [sp, #1016]
-b f3
+    b draw_game_character
 //-------------------------------------------------------------
 show_fire:
-    ldr r5, [sp, #1012] //row data
+/*    ldr r5, [sp, #1012] //row data
     movs r7, r5
     ldr r6, [sp, #1008] //column data
     sub r7, r7, #1
@@ -206,14 +188,14 @@ show_fire:
 draw_fire:
     str	r5, [r0]
     str	r6, [r0, #4]
-		ldr r3, color3
+		ldr r3, green
     str	r3, [r0, #8]
     add r7, r7, #1
     sub r5, r5, #1
     cmp r7, #4
     bne draw_fire
 		str	r3, [r0, #12]
-    movs r7, #0
+    movs r7, #0 */
 b f5
 //-------------------------------------------------------------
 delay:
@@ -260,7 +242,7 @@ enemy_cont:
 
 		str 	r6, [r0]
 		str 	r7, [r0, #4]
-		ldr   r3, color1
+		ldr   r3, yellow
 		str	  r3, [r0, #8]
 
 		movs r4, #12
@@ -367,6 +349,7 @@ lcun4:
 //-------------------------------------------------------------
 show_enemy_fire:
     ldr  r4, [sp, #12]  //load counter
+		ldr r3, red
 enemy_fire_cont:
 		cmp   r4, #0
 		beq   f_en1
@@ -407,7 +390,6 @@ f_en2_fire:
 draw_fire_enemy:
 		str	r5, [r0]
 		str	r6, [r0, #4]
-		ldr r3, color2
 		str	r3, [r0, #8]
 		add r7, r7, #1
 		sub r5, r5, #1
@@ -415,7 +397,6 @@ draw_fire_enemy:
 		bne draw_fire_enemy
 lcun2:
 		movs r7, #0
-		ldr r3, color2
 		str r3, [r0, #12]
 		add r4, r4, #1  //increment counter
 b enemy_fire_cont
@@ -508,7 +489,7 @@ update_chain_2:
 		bhs checkp1
 		b lcun5
 checkp1:
-		add r5, r5, #12
+		add r5, r5, #13
 		cmp r7, r5
 		bls checkp2
 		b lcun5
@@ -556,6 +537,11 @@ killp2:
 lcun5:
 		add r2, r2, #1
 		b update_player_cont
+//------------------------------------------------------------2'nd jump point
+ldr_r0_2: ldr r0, peripheral
+					b ret1
+ldr_r3_2:	ldr r3, yellow
+					b ret2
 //------------------------------------------------------------
 move_enemy: //counter defined in r2
 		ldr r1, [sp, #24]
@@ -588,10 +574,202 @@ assign_1:
 		str  r1, [sp, #24]
 		b update_enemy_cont
 //------------------------------------------------------------
+//next section of the code is dedicated to sprites and animation
+//------------------------------------------------------------
+draw_game_character:
+	  ldr  r3, cyan
+		ldr  r0, peripheral
+    str	 r3, [r0, #8]
+		movs r5, #0
+		movs r4, #8
+		add  r4, r4, r2
+		add  r1, r1, #12
+
+a:	add r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		cmp	r2, r4
+		bne	a
+
+		cmp r5, #2
+		beq	final1
+		cmp r5, #1
+		beq	b
+
+		add r5, r5, #1
+		sub r2, r2, #8
+		add r1,	r1, #7 //11. satır, 1. sütun noktası
+		sub r4, r4, #1
+		cmp r5, #1
+		beq	a
+
+b:	add r5, r5, #1
+		add r1,	r1, #6
+		sub r2, r2, #7	//10. satır, 1. sütun noktası
+		sub r4, r4, #1
+		cmp r5, #2
+		beq	a
+
+final1:
+    str	  r3, [r0, #12]
+
+		movs r5, #0
+		add r2, r2, #8
+		add r1, r1, #8
+c:	sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		cmp	r2, r4
+		bne	c
+
+		cmp r5, #2
+		beq	final2
+		cmp r5, #1
+		beq	d
+
+		add r5, r5, #1
+		add r2, r2, #8
+		add r1,	r1, #7 //11. satır, 13. sütun noktası
+		add r4, r4, #1
+		cmp r5, #1
+		beq	c
+
+d:	add r5, r5, #1
+		add r1,	r1, #6
+		add r2, r2, #7	//10. satır, 1. sütun noktası
+		add r4, r4, #1
+		cmp r5, #2
+		beq	c
+
+final2:
+    add r1, r1, #2
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #2
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		ldr 	r1, [sp, #1020]
+    ldr 	r2, [sp, #1016]
+
+		add r2, r2, #7
+		add r4,	r1, #2
+		ldr r3, red
+
+e:	add r1,	r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r1,r4
+		bls	e
+
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		sub r2, r2, #2
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r1,	r1, #1
+		sub r2, r2, #2
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,	r2, #6
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		ldr r3, white
+		sub r2,	r2, #6
+		add r1,	r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #6
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		ldr r3, red
+		add r2, r2, #3
+		add r1, r1, #2
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub	r2, r2, #12
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		ldr r3, white
+		add r1,	r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #12
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #9
+		add r5, r2, #5
+
+f:	add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r2, r5
+		bls	f
+
+		sub r2, r2, #3
+		add r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r2, r5
+		add r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r2, r5
+
+		str	r3, [r0, #12]
+		ldr r2, [sp, #1016]
+		ldr r3, red
+		b f3
+		bx lr
+//------------------------------------------------------------
 .balign 4
 delay_constant:  .word 15000
 width:           .word 310
-data:            .word 996
-color1:          .word 0xFFFFFF00
-color2:          .word 0xFFFF0000
-color3:          .word 0xFF00FF00
+peripheral:      .word 0x40010000
+yellow:          .word 0xFFFFFF00 //yellow
+red:             .word 0xFFFF0000 //red
+green:           .word 0xFF00FF00 //green
+white:           .word 0xFFFFFFFF //white
+cyan:            .word 0xFF33FFFF //cyan
