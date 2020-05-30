@@ -179,7 +179,7 @@ player_cont:
     b draw_game_character
 //-------------------------------------------------------------
 show_fire:
-/*    ldr r5, [sp, #1012] //row data
+    ldr r5, [sp, #1012] //row data
     movs r7, r5
     ldr r6, [sp, #1008] //column data
     sub r7, r7, #1
@@ -195,7 +195,7 @@ draw_fire:
     cmp r7, #4
     bne draw_fire
 		str	r3, [r0, #12]
-    movs r7, #0 */
+    movs r7, #0 
 b f5
 //-------------------------------------------------------------
 delay:
