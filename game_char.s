@@ -116,7 +116,9 @@ collide:
 		movs r6, #0
 		ldr r5, [sp, #1020]
 		ldr r6, [sp, #1016]
-		ldr r7, width
+		b	ldr_r7
+return7:		
+
 	  sub r7, r7, #12
 
 		cmp r6, r7  //if x > width => x=width
@@ -158,14 +160,7 @@ cont_update_fire_p:
 		str r5, [sp, #1012]
 		str r6, [sp, #1008]
 b f9
-//-------------------------------------------------------------//jump point
-show_enemy_fire_jump: b show_enemy_fire
-update_enemy_fire_jump: b update_enemy_fire
-update_player_jump: b update_player
-ldr_r0:		ldr	 r0, =0x40010000
-				b return 
-ldr_r3:			ldr  r3, color1   
-				b return2
+
 //-------------------------------------------------------------
 show_charater:
 		ldr   r5, [sp, #16] //is the enemy dead?
@@ -177,8 +172,8 @@ player_cont:
 
     ldr 	r1, [sp, #1020]
     ldr 	r2, [sp, #1016]
-	
-		ldr   r3, color5
+		b	ldr_r3_2
+return3_2:
     	str	  r3, [r0, #8]
 		movs r5, #0
 		movs r4, #8
@@ -274,8 +269,9 @@ final2:	add r1, r1, #2
     	ldr 	r2, [sp, #1016]
 	
 		add r2, r2, #7
-		add r4,	r1, #2	
-		ldr r3, color2
+		add r4,	r1, #2
+		b	ldr_r3_3
+return3_3:	
 						
 e:		add r1,	r1, #1
 		str	r1, [r0]
@@ -303,8 +299,8 @@ e:		add r1,	r1, #1
 		str	r1, [r0]
 		str	r2, [r0, #4]
 		str	r3, [r0, #8]
-		
-		ldr r3, color4
+		b	ldr_r3_4
+return3_4:
 		sub r2,	r2, #6
 		add r1,	r1, #1
 		str	r1, [r0]
@@ -315,8 +311,8 @@ e:		add r1,	r1, #1
 		str	r1, [r0]
 		str	r2, [r0, #4]
 		str	r3, [r0, #8]
-		
-		ldr r3, color2
+		b	ldr_r3_6
+return3_6:
 		add r2, r2, #3
 		add r1, r1, #2
 		str	r1, [r0]
@@ -327,8 +323,8 @@ e:		add r1,	r1, #1
 		str	r1, [r0]
 		str	r2, [r0, #4]
 		str	r3, [r0, #8]
-		
-		ldr r3, color4
+		b ldr_r3_7
+return3_7:
 		add r1,	r1, #1
 		str	r1, [r0]
 		str	r2, [r0, #4]
@@ -378,7 +374,8 @@ show_fire:
 draw_fire:
     str	r5, [r0]
     str	r6, [r0, #4]
-		ldr r3, color3
+    b	ldr_r3_8
+return3_8:
     str	r3, [r0, #8]
     add r7, r7, #1
     sub r5, r5, #1
@@ -433,25 +430,255 @@ enemy_cont:
 
 		str 	r6, [r0]
 		str 	r7, [r0, #4]
-		ldr   r3, color1
-		str	  r3, [r0, #8]
+		ldr   r3, =0xFF6666FF 
+		movs r5, r7
+		movs r4, r6
+		add	 r4, r4, #3
+		add  r5, r5, #12
+		
+		sub r7, r7, #1
+		sub r6,	r6, #1
 
-		movs r4, #12
-		add  r4, r4, r6
-		movs r5, #30
-		add  r5, r5, r7
-
-be:	add	r7, r7, #1
-ae:	add	r6, r6, #1
+bb:		add r7, r7, #1
+aa:		add	r6, r6, #1
 		str	r6, [r0]
 		str	r7, [r0, #4]
 		str	r3, [r0, #8]
-
 		cmp	r6, r4
-		bne	ae
-		movs r6, r1
-		cmp	r7, r5
-		bne	be
+		bne	aa
+		sub r6, r6, #4
+		cmp r7, r5
+		bne bb
+		
+		add r4, r6, #7
+cc:		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		add r6, r6, #1 
+		cmp r6, r4
+		bls cc
+		
+		sub r7, r7, #2
+		sub r6,	r6, #3
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r7, r7, #1
+		add r4, r6, #4
+		
+dd:		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		add r6, r6, #1
+		cmp r6, r4
+		bls dd
+		
+		sub r6, r6, #5
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r6, r6, #2
+		sub r7, r7, #1
+		add r4, r6, #5
+		
+ff:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne ff
+		
+		sub r7, r7, #1
+		sub r6, r6, #10
+		add r4, r4, #2
+gg:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne gg
+		
+		sub r6, r6, #7
+		sub r7, r7, #1
+		add r4, r6, #5
+hh:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne hh
+		
+		sub r6, r6, #4
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r6, r6, #2
+		sub r7, r7, #1
+		add r4, r6, #5
+jj:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne jj
+		
+		sub r6, r6, #4
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r7, r7, #2
+		add r4, r6, #2
+		sub r6, r6, #6	
+mm:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne mm
+		ldr r3, =0xFFFF0000
+		sub r6, r6, #7
+		add r7, r7, #12 	//[konum 13,1]	
+	
+		sub r7, r7, #3
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6,	r6, #2
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+			
+		sub r7, r7, #1
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]		
+		
+		sub r7, r7, #1
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r7, r7, #1
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6, r6, #5
+		sub r7, r7, #3
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r6, r6, #2
+		add r7, r7, #3
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r7, r7, #6
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		add r7, r7, #3
+		sub r6, r6, #2		
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
+		ldr r3, = 0xFFFFFFFF
+		add	r6, r6, #4
+		sub r7, r7, #6
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		
 		movs r7, r2
 		str	r3, [r0, #12]
 lcun1:
@@ -760,6 +987,32 @@ assign_1:
 		movs r1, #1
 		str  r1, [sp, #24]
 		b update_enemy_cont
+//-------------------------------------------------------------//jump point
+show_enemy_fire_jump: b show_enemy_fire
+update_enemy_fire_jump: b update_enemy_fire
+update_player_jump: b update_player
+ldr_r0:		ldr	 r0, =0x40010000
+				b return 
+ldr_r3:			ldr  r3, color1   
+				b	return2
+ldr_r7:			ldr	r7, width
+				b	return7
+ldr_r3_2:		ldr	r3, color5				
+				b	return3_2
+ldr_r3_3:		ldr r3, color2
+				b	return3_3	
+							
+ldr_r3_4:		ldr r3, color4
+				b	return3_4	
+ldr_r3_6:		ldr r3, color2
+				b	return3_6	
+
+ldr_r3_7:		ldr r3, color4
+				b 	return3_7
+ldr_r3_8: 		ldr r3, color3	
+				b	return3_8
+			
+		
 //------------------------------------------------------------
 .balign 4
 delay_constant:  .word 15000
