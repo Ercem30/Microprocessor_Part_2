@@ -37,7 +37,6 @@ ret2:							         						            			//      972 -> fire 2 pos, row
 		str  r7, [sp, #12]  //assign initial state of counter
 		str  r7, [sp, #24]  //0 means moves right
 
-
 		str	r3, [r0, #12]   //refresh the screen
 		str	r3, [r0, #0x10] //clear the screen
 
@@ -170,7 +169,6 @@ show_charater:
 		ldr   r5, [sp, #16] //is the enemy dead?
 		cmp   r5, #1
 		beq   player_cont
-		ldr r3, red
 		b f3
 
 player_cont:
@@ -195,7 +193,7 @@ draw_fire:
     cmp r7, #4
     bne draw_fire
 		str	r3, [r0, #12]
-    movs r7, #0 
+    movs r7, #0
 b f5
 //-------------------------------------------------------------
 delay:
@@ -206,6 +204,10 @@ delay_loop:
     beq  f6
     add  r7, r7, #1
     b delay_loop
+//-------------------------------------------------------------
+.balign 4
+delay_constant:  .word 15000
+width:           .word 310
 //-------------------------------------------------------------
 show_enemy:
 		ldr r4, [sp, #12]
@@ -338,6 +340,18 @@ kill2:
 		b lcun4_ld
 
 lcun4_ld:
+    ldr r3, [sp, #16]
+		cmp r3, #0
+		beq reset_fire_player
+		b lcun4_ld_pl
+reset_fire_player:
+		movs r5, #0
+		sub  r5, r5, #5
+		movs  r6, #1
+		str r5, [sp, #1012]
+		str r6, [sp, #1008] //update fire
+b lcun4
+lcun4_ld_pl:
 		ldr r5, [sp, #1020] //row data
 		ldr r6, [sp, #1016] //column data
 		add r6, r6, #6
@@ -500,12 +514,12 @@ checkp2:
 checkp3:
 		add r4, r4, #12
 		cmp r6, r4
-		bls checkp4
+		bls kill_player//checkp4
 		b lcun5
-checkp4:
+/*checkp4:
 		cmp r3, #1
 		beq kill_player
-		b lcun5
+		b lcun5*/
 
 kill_player:
 		cmp r2, #0
@@ -765,11 +779,11 @@ f:	add r2, r2, #1
 		bx lr
 //------------------------------------------------------------
 .balign 4
-delay_constant:  .word 15000
-width:           .word 310
 peripheral:      .word 0x40010000
 yellow:          .word 0xFFFFFF00 //yellow
 red:             .word 0xFFFF0000 //red
 green:           .word 0xFF00FF00 //green
 white:           .word 0xFFFFFFFF //white
 cyan:            .word 0xFF33FFFF //cyan
+s_col1:          .word 0xFFFFFF8D
+s_col2:          .word 0xFFFFF9C4
