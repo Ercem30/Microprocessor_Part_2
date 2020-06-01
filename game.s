@@ -42,13 +42,25 @@ ret2:							         						            			//      972 -> fire 2 pos, row
 
 		str	r3, [r0, #12]   //refresh the screen
 		str	r3, [r0, #0x10] //clear the screen
+//-------------------------------------------------------------
+start_page:
+			b start_jump_1
 
 main_loop:
       str	r3, [r0, #12] //refresh the screen
 	   	b show            //show
 			str	r3, [r0, #12] //refresh the screen
 f1:		b update          //update
+main_loop_2:
       str	r3, [r0, #12] //refresh the screen
+			ldr r7, [sp, #4]
+			cmp r7, #0
+			beq game_over_page
+			b main_loop
+
+game_over_page:
+			str	r3, [r0, #0x10]
+			b game_over_jump_1
 //-------------------------------------------------------------
 update:
       b update_movement    //update player position -> f2
@@ -60,7 +72,7 @@ f9:   b update_enemy       // -> f10 (update movement inside)
 f10:  b update_enemy_fire_jump  // -> f12
 f12:	b update_player_jump        // -> f4
 f4:		str	r3, [r0, #12]
-      b main_loop
+      b main_loop_2
 show:
 			str	r3, [r0, #12]    //refresh the screen
 			str	r3, [r0, #0x10]  //clear the screen
@@ -250,26 +262,10 @@ enemy_cont:
 
 		str 	r6, [r0]
 		str 	r7, [r0, #4]
-		b ldr_r3_4
-ret4:
-		str	  r3, [r0, #8]
 
-		movs r4, #12
-		add  r4, r4, r6
-		movs r5, #30
-		add  r5, r5, r7
+		b draw_game_enemy_jump
+end_game_enemy:
 
-be:	add	r7, r7, #1
-ae:	add	r6, r6, #1
-		str	r6, [r0]
-		str	r7, [r0, #4]
-		str	r3, [r0, #8]
-
-		cmp	r6, r4
-		bne	ae
-		movs r6, r1
-		cmp	r7, r5
-		bne	be
 		movs r7, r2
 		str	r3, [r0, #12]
 lcun1:
@@ -278,7 +274,9 @@ lcun1:
 		str r7, [sp, #12] //update counter
 b show_enemy
 //-------------------------------------------------------------3'rd jump point
-
+game_over_jump_1: b game_over_jump_2
+start_jump_1: b start_jump_2
+main_jump_3: b main_loop
 //-------------------------------------------------------------
 update_enemy:
     ldr r2, [sp, #12]   //counter
@@ -397,7 +395,7 @@ draw_three_p:
 //-------------------------------------------------------------
 show_enemy_fire:
     ldr  r4, [sp, #12]  //load counter
-		ldr r3, red
+		b ldr_r3_4
 enemy_fire_cont:
 		cmp   r4, #0
 		beq   f_en1
@@ -606,8 +604,13 @@ ldr_r3_2:	ldr r3, yellow
 					b ret2
 ldr_r3_3: ldr r3, green
 					b ret3
-ldr_r3_4: ldr r3, yellow
-					b ret4
+ldr_r3_4: ldr r3, red
+					b enemy_fire_cont
+draw_game_enemy_jump: b draw_game_enemy
+end_game_enemy_jump: b end_game_enemy
+game_over_jump_2: b game_over
+start_jump_2: b start_jump_3
+main_jump_2: b main_jump_3
 //------------------------------------------------------------
 reset_player:
 		ldr r1, [sp, #8]
@@ -847,6 +850,257 @@ f:	add r2, r2, #1
 		ldr r3, red
 		b f3
 //------------------------------------------------------------
+draw_game_enemy:
+		ldr  r3, s_col3    //=0xFF6666FF
+		movs r5, r7
+		movs r4, r6
+		add	 r4, r4, #3
+		add  r5, r5, #12
+
+		sub r7, r7, #1
+		sub r6,	r6, #1
+
+		bb:		add r7, r7, #1
+		aa:		add	r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp	r6, r4
+		bne	aa
+		sub r6, r6, #4
+		cmp r7, r5
+		bne bb
+
+		add r4, r6, #7
+		cc:		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		add r6, r6, #1
+		cmp r6, r4
+		bls cc
+
+		sub r7, r7, #2
+		sub r6,	r6, #3
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #1
+		add r4, r6, #4
+
+		dd:		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		add r6, r6, #1
+		cmp r6, r4
+		bls dd
+
+		sub r6, r6, #5
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r6, r6, #2
+		sub r7, r7, #1
+		add r4, r6, #5
+
+		ff:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne ff
+
+		sub r7, r7, #1
+		sub r6, r6, #10
+		add r4, r4, #2
+		gg:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne gg
+
+		sub r6, r6, #7
+		sub r7, r7, #1
+		add r4, r6, #5
+		hh:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne hh
+
+		sub r6, r6, #4
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r6, r6, #2
+		sub r7, r7, #1
+		add r4, r6, #5
+		jj:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne jj
+
+		sub r6, r6, #4
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #2
+		add r4, r6, #2
+		sub r6, r6, #6
+		mm:		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+		cmp r6, r4
+		bne mm
+		ldr r3, red
+		sub r6, r6, #7
+		add r7, r7, #12 	//[konum 13,1]
+
+		sub r7, r7, #3
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6,	r6, #2
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #1
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6,	r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #1
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #1
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r7, r7, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6, r6, #1
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6, r6, #5
+		sub r7, r7, #3
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r6, r6, #2
+		add r7, r7, #3
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r7, r7, #6
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r7, r7, #3
+		sub r6, r6, #2
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+
+		ldr r3, white
+		add	r6, r6, #4
+		sub r7, r7, #6
+		str	r6, [r0]
+		str	r7, [r0, #4]
+		str	r3, [r0, #8]
+b end_game_enemy_jump
+//------------------------------------------------------------
 draw_heart:
     ldr r3, red
 		ldr r0, peripheral
@@ -962,3 +1216,665 @@ white:           .word 0xFFFFFFFF //white
 cyan:            .word 0xFF33FFFF //cyan
 s_col1:          .word 0xFFFFFF8D
 s_col2:          .word 0xFFFFF9C4
+s_col3:          .word 0xFF6666FF
+//------------------------------------------------------------
+start_jump_3: b start
+main_jump_1: b main_jump_2
+//------------------------------------------------------------
+game_over:
+		ldr	r0, peripheral2
+
+		movs	r1, #88
+		movs	r2, #120
+
+		ldr r3, white2
+
+		add  r6, r2, #6
+		add  r6, r6, #6
+		movs r7, #1
+
+Game_over_1:
+		cmp r7, #1
+		bne x_g_o
+		add  r1, r1, #1
+		add  r2, r2, #1
+		cmp  r2, r6
+		bls  yol
+
+x_g_o:
+		add  r7, r7, #1
+		add  r1, r1, #4
+		cmp r7, #2
+		beq yol
+
+		sub r1, r1, #3
+		sub r2, r2, #19
+		cmp r7, #3
+		beq yol
+
+		add r1, r1, #4
+		add r2, r2, #16
+		cmp r7, #4
+		beq yol
+		cmp r7, #5
+		beq yol
+		cmp r7, #6
+		beq yol
+
+		add r2, r2, #4
+		cmp r7, #7
+		beq yol
+
+		sub r1, r1, #4
+		cmp r7, #8
+		beq yol
+
+		cmp r7, #9
+		beq yol
+
+		sub r1, r1, #4
+		cmp r7, #10
+		beq yol
+
+		sub r2, r2, #4
+		cmp r7, #11
+		beq yol
+
+		add r1, r1, #4
+		sub r2, r2, #4
+		cmp r7, #12
+		beq yol
+		sub r1, r1, #8
+		add r2, r2, #16
+		cmp r7, #13
+		beq yol
+		add r1, r1, #12
+		sub r2, r2, #12
+		cmp r7, #14
+		beq yol
+		cmp r7, #15
+		beq yol
+		cmp r7, #16
+		beq yol
+		cmp r7, #17
+		beq yol
+		sub r1, r1, #24
+		add r2, r2, #4
+		cmp r7, #18
+		beq yol
+		add r1, r1, #20
+		cmp r7, #19
+		beq yol
+		cmp r7, #20
+		beq yol
+		add r1, r1, #4
+		cmp r7, #21
+		beq yol
+		sub r2, r2, #4
+		cmp r7, #22
+		beq yol
+		cmp r7, #23
+		beq yol
+		cmp r7, #24
+		beq yol
+		cmp r7, #25
+		beq yol
+		sub r1, r1, #16
+		sub r2, r2, #12
+		cmp r7, #26
+		beq yol
+		add r1, r1, #12
+		add r2, r2, #16
+		cmp r7, #27
+		beq yol
+		cmp r7, #28
+		beq yol
+		sub r1, r1, #8
+		add r2, r2, #8
+		cmp r7, #29
+		beq yol
+		b devam
+yol: b kare3
+devam:
+		add r1, r1, #12
+		sub r2, r2, #12
+		cmp r7, #30
+		beq yol
+		cmp r7, #31
+		beq yol
+		cmp r7, #32
+		beq yol
+		cmp r7, #33
+		beq yol
+		cmp r7, #34
+		beq yol
+		sub r1, r1, #20
+		add r2, r2, #4
+		cmp r7, #35
+		beq yol
+		add r1, r1, #20
+		cmp r7, #36
+		beq yol
+		sub r1, r1, #8
+		cmp r7, #37
+		beq yol
+		cmp r7, #38
+		beq yol
+		add r1, r1, #8
+		sub r2, r2, #4
+		cmp r7, #39
+		beq yol
+		cmp r7, #40
+		beq yol
+		cmp r7, #41
+		beq yol
+		cmp r7, #42
+		beq yol
+		cmp r7, #43
+		beq yol
+		sub r1, r1, #24
+		add r2, r2, #8
+		cmp r7, #44
+		beq yol
+		add r1, r1, #24
+		sub r2, r2, #8
+		cmp r7, #45
+		beq yol
+		cmp r7, #46
+		beq yol
+		cmp r7, #47
+		beq yol
+		cmp r7, #48
+		beq yol
+		cmp r7, #49
+		beq yol
+		sub r1, r1, #24
+		add r2, r2, #4
+		cmp r7, #50
+		beq yol
+		add r1, r1, #20
+		cmp r7, #51
+		beq yol
+		cmp r7, #52
+		beq yol
+		cmp r7, #53
+		beq yol
+		add r1, r1, #8
+		sub r2, r2, #16
+		cmp r7, #54
+		beq yol
+		sub r1, r1, #8
+		add r2, r2, #16
+		cmp r7, #55
+		beq yol
+		cmp r7, #56
+		beq yol
+		add r1, r1, #12
+		sub r2, r2, #12
+		cmp r7, #57
+		beq yol
+		sub r1, r1, #12
+		add r2, r2, #12
+		cmp r7, #58
+		beq yol
+		cmp r7, #59
+		beq yol
+		cmp r7, #60
+		beq yol
+		add r1, r1, #16
+		sub r2, r2, #92
+		cmp r7, #61
+		beq yol
+		sub r1, r1, #12
+		add r2, r2, #88
+		cmp r7, #62
+		beq yol
+		cmp r7, #63
+		beq yol
+		cmp r7, #64
+		beq yol
+		add r2, r2, #4
+		cmp r7, #65
+		beq yol
+		sub r1, r1, #4
+		cmp r7, #66
+		beq yol
+		cmp r7, #67
+		beq yol
+		sub r1, r1, #4
+		cmp r7, #68
+		beq yol
+		sub r2, r2, #4
+		cmp r7, #69
+		beq yol
+		cmp r7, #70
+		beq yol
+		cmp r7, #71
+		beq yol
+		sub r2, r2, #4
+		cmp r7, #72
+		beq yol
+		add r1, r1, #4
+		cmp r7, #73
+		beq yol
+		cmp r7, #74
+		beq yol
+		add r2, r2, #24
+		cmp r7, #75
+		beq yol
+		sub r2, r2, #20
+		add r1, r1, #4
+		cmp r7, #76
+		beq kare3
+		cmp r7, #77
+		beq kare3
+		add r2, r2, #4
+		cmp r7, #78
+		beq kare3
+		cmp r7, #79
+		beq kare3
+		sub r2, r2, #4
+		cmp r7, #80
+		beq kare3
+		sub r1, r1, #12
+		add r2, r2, #4
+		cmp r7, #81
+		beq kare3
+		add r1, r1, #4
+		cmp r7, #82
+		beq kare3
+		sub r2, r2, #4
+		cmp r7, #83
+		beq kare3
+		cmp r7, #84
+		beq kare3
+		add r1, r1, #4
+		add r2, r2, #8
+		cmp r7, #85
+		beq kare3
+		sub r2, r2, #8
+		add r1, r1, #4
+		cmp r7, #86
+		beq kare3
+		cmp r7, #87
+		beq kare3
+		cmp r7, #88
+		beq kare3
+		cmp r7, #89
+		beq kare3
+		cmp r7, #90
+		beq kare3
+		sub r1, r1, #24
+		add r2, r2, #4
+		cmp r7, #91
+		beq kare3
+		add r1, r1, #20
+		cmp r7, #92
+		beq kare3
+		cmp r7, #93
+		beq kare3
+		cmp r7, #94
+		beq kare3
+		add r1, r1, #8
+		sub r2, r2, #16
+		cmp r7, #95
+		beq kare3
+		sub r1, r1, #8
+		add r2, r2, #16
+		cmp r7, #96
+		beq kare3
+		cmp r7, #97
+		beq kare3
+		add r1, r1, #12
+		sub r2, r2, #12
+		cmp r7, #98
+		beq kare3
+		sub r1, r1, #12
+		add r2, r2, #12
+		cmp r7, #99
+		beq kare3
+		cmp r7, #100
+		beq kare3
+		cmp r7, #101
+		beq kare3
+		sub r1, r1, #20
+		add r2, r2, #4
+		cmp r7, #102
+		beq kare3
+		add r1, r1, #24
+		sub r2, r2, #8
+		cmp r7, #103
+		beq kare3
+		cmp r7, #104
+		beq kare3
+		cmp r7, #105
+		beq kare3
+		cmp r7, #106
+		beq kare3
+		cmp r7, #107
+		beq kare3
+		sub r1, r1, #24
+		add r2, r2, #4
+		cmp r7, #108
+		beq kare3
+		add r1, r1, #20
+		cmp r7, #109
+		beq kare3
+		cmp r7, #110
+		beq kare3
+		add r1, r1, #4
+		cmp r7, #111
+		beq kare3
+		sub r2, r2, #8
+		cmp r7, #112
+		beq kare3
+		sub r1, r1, #4
+		cmp r7, #113
+		beq kare3
+		cmp r7, #114
+		beq kare3
+		add r1, r1, #4
+		add r2, r2, #8
+		cmp r7, #115
+		beq kare3
+		cmp r7, #116
+		beq kare3
+		cmp r7, #117
+		beq kare3
+		b finish_g_o
+
+kare3:
+	add r3, r3, #20
+
+	sub r2, r2, #1
+	sub r1, r1, #1
+	add r4, r1, #4
+	add r5, r2, #4
+b_g_o:
+	add r2, r2, #1
+a_g_o:
+	add r1, r1, #1
+	str r1, [r0]
+	str r2, [r0, #4]
+	str r3, [r0, #8]
+
+	cmp r1, r4
+	bne a_g_o
+	sub r1, r1, #4
+	cmp r2, r5
+	bne b_g_o
+
+	str	r3, [r0, #12]
+
+	b Game_over_1
+
+finish_g_o:
+	lsr r0, r0, #4
+	movs r1, #0
+z_g_o:
+	add r1, r1, #120
+	cmp r1, r0
+	bls z_g_o
+
+	movs	r1, #88
+	movs	r2, #117
+	add  r6, r2, #6
+	add  r6, r6, #6
+	movs r7, #1
+
+	add r3, r3, #200
+	lsl r0, r0, #4
+b Game_over_1
+//------------------------------------------------------------
+.balign 4
+peripheral2:      .word 0x40010000
+white2:           .word 0xFFFFFFFF //white
+//------------------------------------------------------------
+start:
+ldr	r0, =0x40010000
+
+		movs	r1, #88
+		movs	r2, #100
+		ldr r3, = 0xFFFFFFFF
+		movs r7, #0
+
+		start_game:
+		ldr r4, [r0, #0x20]
+		cmp r4, #2
+		beq jump_main_t
+		b cont_start
+
+		jump_main_t: b main_jump_1
+
+cont_start:
+		add r7, r7, #1
+
+		cmp r7, #1
+		beq yol1
+		add r1, r1, #1
+		add r2, r2, #1
+		cmp r7, #2
+		beq yol1
+		cmp r7, #3
+		beq yol1
+		cmp r7, #4
+		beq yol1
+		add r1, r1, #4
+		sub r2, r2, #20
+		cmp r7, #5
+		beq yol1
+		add r2, r2, #20
+		cmp r7, #6
+		beq yol1
+		sub r1, r1, #4
+		cmp r7, #7
+		beq yol1
+		cmp r7, #8
+		beq yol1
+		add r1, r1, #4
+		cmp r7, #9
+		beq yol1
+		sub r2, r2, #4
+		cmp r7, #10
+		beq yol1
+		sub r2, r2, #4
+		cmp r7, #11
+		beq yol1
+		sub r1, r1, #4
+		cmp r7, #12
+		beq yol1
+		cmp r7, #13
+		beq yol1
+
+		cmp r7, #14
+		beq yol1
+		sub r1, r1, #20
+		add r2, r2, #28
+		cmp r7, #15
+		beq yol1
+		add r1, r1, #20
+		sub r2, r2, #20
+		cmp r7, #16
+		beq yol1
+		cmp r7, #17
+		beq yol1
+		cmp r7, #18
+		beq yol1
+		cmp r7, #19
+		beq yol1
+		add r1, r1, #4
+		sub r2, r2, #12
+		cmp r7, #20
+		beq yol1
+		add r2, r2, #8
+		cmp r7, #21
+		beq yol1
+		cmp r7, #22
+		beq yol1
+		cmp r7, #23
+		beq yol1
+		cmp r7, #24
+		beq yol1
+		sub r1, r1, #20
+		add r2, r2, #16
+		cmp r7, #25
+		beq yol1
+		add r1, r1, #20
+		sub r2, r2, #16
+		cmp r7, #26
+		beq yol1
+		cmp r7, #27
+		beq yol1
+		cmp r7, #28
+		beq yol1
+		cmp r7, #29
+		beq yol1
+		sub r1, r1, #16
+		add r2, r2, #4
+		cmp r7, #30
+		beq yol1
+		add r1, r1, #12
+		cmp r7, #31
+		beq yol1
+		cmp r7, #32
+		beq yol1
+		cmp r7, #33
+		beq yol1
+		sub r2, r2, #4
+		sub r1, r1, #4
+		cmp r7, #34
+		beq yol1
+		b devam_start
+		yol1: b kare3_1
+devam_start:
+		add r1, r1, #12
+		cmp r7, #35
+		beq kare3_1
+		sub r1, r1, #4
+		cmp r7, #36
+		beq kare3_1
+		cmp r7, #37
+		beq kare3_1
+		sub r1, r1, #24
+		sub r2, r2, #4
+		cmp r7, #38
+		beq kare3_1
+		add r1, r1, #20
+		cmp r7, #39
+		beq kare3_1
+		cmp r7, #40
+		beq kare3_1
+		add r2, r2, #24
+		cmp r7, #41
+		beq kare3_1
+		add r1, r1, #4
+		sub r2, r2, #20
+		cmp r7, #42
+		beq kare3_1
+		cmp r7, #43
+		beq kare3_1
+		cmp r7, #44
+		beq kare3_1
+		cmp r7, #45
+		beq kare3_1
+		cmp r7, #46
+		beq kare3_1
+		sub r1, r1, #24
+		add r2, r2, #4
+		cmp r7, #47
+		beq kare3_1
+		add r1, r1, #20
+		cmp r7, #48
+		beq kare3_1
+		cmp r7, #49
+		beq kare3_1
+		add r1, r1, #4
+		cmp r7, #50
+		beq kare3_1
+		sub r2, r2, #8
+		cmp r7, #51
+		beq kare3_1
+		sub r1, r1, #4
+		cmp r7, #52
+		beq kare3_1
+		cmp r7, #53
+		beq kare3_1
+		add r1, r1, #4
+		add r2, r2, #8
+		cmp r7, #54
+		beq kare3_1
+		cmp r7, #55
+		beq kare3_1
+		cmp r7, #56
+		beq kare3_1
+		sub r1, r1, #24
+		add r2, r2, #4
+		cmp r7, #57
+		beq kare3_1
+		add r1, r1, #20
+		sub r2, r2, #4
+		cmp r7, #58
+		beq kare3_1
+		cmp r7, #59
+		beq kare3_1
+		cmp r7, #60
+		beq kare3_1
+		cmp r7, #61
+		beq kare3_1
+		add r1, r1, #4
+		sub r2, r2, #12
+		cmp r7, #62
+		beq kare3_1
+		add r2, r2, #8
+		cmp r7, #63
+		beq kare3_1
+		cmp r7, #64
+		beq kare3_1
+		cmp r7, #65
+		beq kare3_1
+		cmp r7, #66
+		beq kare3_1
+		b finish_start
+
+kare3_1:
+		add r3, r3, #20
+
+		sub r2, r2, #1
+		sub r1, r1, #1
+		add r4, r1, #4
+		add r5, r2, #4
+b_sp:
+	 add r2, r2, #1
+a_sp:
+	 add r1, r1, #1
+	str r1, [r0]
+	str r2, [r0, #4]
+	str r3, [r0, #8]
+
+	cmp r1, r4
+	bne a_sp
+	sub r1, r1, #4
+	cmp r2, r5
+	bne b_sp
+
+	str	r3, [r0, #12]
+
+	b start_game
+
+finish_start:
+	lsr r0, r0, #4
+	movs r1, #0
+z_sp:
+  add r1, r1, #120
+	cmp r1, r0
+	bls z_sp
+
+	movs	r1, #88
+	movs	r2, #100
+	add  r6, r2, #6
+	add  r6, r6, #6
+	movs r7, #1
+
+	add r3, r3, #1
+	lsl r0, r0, #4
+b start_game
