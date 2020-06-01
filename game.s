@@ -1,7 +1,7 @@
 initial_sp:        .word    0x201FFFFC 							 	  //window size: 320x240
 reset_vector:      .word    _main    								    //RAM: 1020 -> row value
 _main:                             								      //     1016 -> column value
-		movs r1, #200    //initialization       			      //     1012 -> fire position, row
+		movs r1, #150    //initialization       			      //     1012 -> fire position, row
  		movs r2, #106                  								      //     1008 -> fire position, col
     str  r2, [sp, #1008]           									    //     1004 -> enemy 1, row position
 		str  r1, [sp, #1012]            								    //     1000 -> enemy 1, col position
@@ -23,9 +23,9 @@ ret2:							         						            			//      972 -> fire 2 pos, row
 		movs r7, #10                                        //      20 -> direction buffer, 1
 		str  r7, [sp, #984] //load enemy 2 to RAM           //      16 -> is player dead?, T = 0
 		add  r7, r7, #10                                    //      12 -> local counter
-		str  r7, [sp, #972]                                 //      current state: f12
-		movs r7, #50
-		str  r7, [sp, #980]
+		str  r7, [sp, #972]                                 //       8 -> timer
+		movs r7, #50                                        //       4 -> life points
+		str  r7, [sp, #980]                                 //      current state: f12
 		add  r7, r7, #15
 		str  r7, [sp, #968]
 		movs r7, #1
@@ -34,8 +34,11 @@ ret2:							         						            			//      972 -> fire 2 pos, row
 		str  r7, [sp, #16]  //player is alive,
 		str  r7, [sp, #20]  //1 means moves left
 		movs r7, #0
-		str  r7, [sp, #12]  //assign initial state of counter
+		str  r7, [sp, #12]  //assign initial state of the counter
 		str  r7, [sp, #24]  //0 means moves right
+		str  r7, [sp, #8]   //assign initial state of the timer
+		movs r7, #3
+		str  r7, [sp, #4]   //assign 3 life points
 
 		str	r3, [r0, #12]   //refresh the screen
 		str	r3, [r0, #0x10] //clear the screen
@@ -61,7 +64,8 @@ f4:		str	r3, [r0, #12]
 show:
 			str	r3, [r0, #12]    //refresh the screen
 			str	r3, [r0, #0x10]  //clear the screen
-      b show_charater      // -> f3
+			b show_life_points_jump // -> f13
+f13:  b show_charater      // -> f3
 f3:		b show_enemy         // -> f8
 f8:   ldr r7, [sp, #1012]  //show fire
   		cmp r7, #0
@@ -121,11 +125,11 @@ collide:
 
 		cmp r6, r7  //if x > width => x=width
 		bhs r6_max
-c1:	cmp r6, #10
+c1:	cmp r6, #15
 		bls r6_min
-c2:	cmp r5, #220
+c2:	cmp r5, #225
 		bhs r5_max
-c3: cmp r5, #160
+c3: cmp r5, #140
 		bls r5_min
 b f7
 
@@ -134,15 +138,15 @@ r6_max:
 		str  r6, [sp, #1016]
 b c1
 r6_min:
-		movs r6, #10
+		movs r6, #15
 		str  r6, [sp, #1016]
 b c2
 r5_max:
-		movs r5, #220
+		movs r5, #225
 		str  r5, [sp, #1020]
 b c3
 r5_min:
-		movs r5, #160
+		movs r5, #140
 		str  r5, [sp, #1020]
 b f7
 //-------------------------------------------------------------
@@ -164,6 +168,7 @@ update_enemy_fire_jump: b update_enemy_fire
 update_player_jump: b update_player
 ldr_r0_1: b ldr_r0_2
 ldr_r3_1: b ldr_r3_2
+show_life_points_jump: b show_life_points
 //-------------------------------------------------------------
 show_charater:
 		ldr   r5, [sp, #16] //is the enemy dead?
@@ -186,7 +191,8 @@ show_fire:
 draw_fire:
     str	r5, [r0]
     str	r6, [r0, #4]
-		ldr r3, green
+		b ldr_r3_3
+ret3:
     str	r3, [r0, #8]
     add r7, r7, #1
     sub r5, r5, #1
@@ -244,7 +250,8 @@ enemy_cont:
 
 		str 	r6, [r0]
 		str 	r7, [r0, #4]
-		ldr   r3, yellow
+		b ldr_r3_4
+ret4:
 		str	  r3, [r0, #8]
 
 		movs r4, #12
@@ -270,6 +277,8 @@ lcun1:
 		add r7, r7, #1
 		str r7, [sp, #12] //update counter
 b show_enemy
+//-------------------------------------------------------------3'rd jump point
+
 //-------------------------------------------------------------
 update_enemy:
     ldr r2, [sp, #12]   //counter
@@ -360,6 +369,31 @@ lcun4_ld_pl:
 lcun4:
 		add r2, r2, #1
 		b update_enemy_cont
+//-------------------------------------------------------------
+show_life_points:
+		ldr r7, [sp, #4] //how many lifes left
+		movs r6, #2
+
+end_heart:
+		cmp r7, #1
+		beq draw_one_p
+		cmp r7, #2
+		beq draw_two_p
+		cmp r7, #3
+		beq draw_three_p
+		b f13
+
+draw_one_p:
+		movs r5, #226
+		b draw_heart
+
+draw_two_p:
+		movs r5, #212
+		b draw_heart
+
+draw_three_p:
+		movs r5, #198
+		b draw_heart
 //-------------------------------------------------------------
 show_enemy_fire:
     ldr  r4, [sp, #12]  //load counter
@@ -472,6 +506,10 @@ b up_en_fire_cont
 update_player:
 		ldr r2, [sp, #12]
 
+		ldr r1, [sp, #16] //is player dead?
+		cmp r1, #0 //if dead
+		beq reset_player
+
 update_player_cont:
 		cmp r2, #0
 		beq up_pl_1
@@ -532,7 +570,12 @@ kill_player:
 
 killp1:
 		movs r1, #0
-		str r1, [sp, #16]  //player is dead
+		str r1, [sp, #1020]
+		str r1, [sp, #1016]
+		str r1, [sp, #16]   //player is dead
+		ldr r1, [sp, #4]    //life points
+		sub r1, r1, #1
+		str r1, [sp, #4]    //update life points
 		ldr r5, [sp, #1004] //row data
 		ldr r6, [sp, #1000] //column data
 		add r6, r6, #15
@@ -541,7 +584,12 @@ killp1:
 		b lcun5
 killp2:
 		movs r1, #0
+		str r1, [sp, #1020]
+		str r1, [sp, #1016]
 		str r1, [sp, #16]  //player is dead
+		ldr r1, [sp, #4]    //life points
+		sub r1, r1, #1
+		str r1, [sp, #4]    //update life points
 		ldr r5, [sp, #984] //row data
 		ldr r6, [sp, #980] //column data
 		add r6, r6, #15
@@ -556,6 +604,28 @@ ldr_r0_2: ldr r0, peripheral
 					b ret1
 ldr_r3_2:	ldr r3, yellow
 					b ret2
+ldr_r3_3: ldr r3, green
+					b ret3
+ldr_r3_4: ldr r3, yellow
+					b ret4
+//------------------------------------------------------------
+reset_player:
+		ldr r1, [sp, #8]
+		ldr r2, [sp, #4]
+		cmp r2, #0
+		beq jump_f4
+		add r1, r1, #1
+		str r1, [sp, #8]
+		cmp r1, #255
+		bhs reset_player_now
+		b f4
+reset_player_now:
+		movs r1, #1
+		str r1, [sp, #16]
+		movs r1, #0
+		str r1, [sp, #8]
+b f4
+jump_f4: b f4
 //------------------------------------------------------------
 move_enemy: //counter defined in r2
 		ldr r1, [sp, #24]
@@ -776,7 +846,112 @@ f:	add r2, r2, #1
 		ldr r2, [sp, #1016]
 		ldr r3, red
 		b f3
-		bx lr
+//------------------------------------------------------------
+draw_heart:
+    ldr r3, red
+		ldr r0, peripheral
+
+		movs r1, r5
+		movs r2, r6
+		add r2, r2, #2
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r2, r2, #2
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		movs r4, #1
+		add r1, r1, #1
+		movs r2, r6
+life_loop_1:
+		cmp r4, #8
+		bhs pass_1
+		add r2, r2, #1
+		ldr r3, red
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r4, r4, #1
+		b life_loop_1
+
+pass_1:
+		movs r4, #0
+		add r1, r1, #1
+		movs r2, r6
+life_loop_2:
+		cmp r4, #9
+		bhs pass_2
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r2, r2, #1
+		add r4, r4, #1
+		b life_loop_2
+
+pass_2:
+		movs r4, #1
+		add r1, r1, #1
+		movs r2, r6
+life_loop_3:
+		cmp r4, #8
+		bhs pass_3
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r4, r4, #1
+		b life_loop_3
+
+pass_3:
+		movs r4, #2
+		add r1, r1, #1
+		movs r2, r6
+		add r2, r2, #1
+life_loop_4:
+		cmp r4, #7
+		bhs pass_4
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r4, r4, #1
+		b life_loop_4
+
+pass_4:
+		movs r4, #3
+		add r1, r1, #1
+		movs r2, r6
+		add r2, r2, #2
+life_loop_5:
+		cmp r4, #6
+		bhs pass_5
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+		add r4, r4, #1
+		b life_loop_5
+
+pass_5:
+		add r1, r1, #1
+		movs r2, #6
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		str	r3, [r0, #12]
+		sub r7, r7, #1
+b end_heart
 //------------------------------------------------------------
 .balign 4
 peripheral:      .word 0x40010000
