@@ -198,35 +198,7 @@ devam:
 	b finish
 	
 	
-space:
 	
-	
-	
-	
-	
-kare2:
-	    add r3, r3, #20
-		
-	    
-	    sub r2, r2, #1
-	    sub r1, r1, #1
-	    add r4, r1, #2
-	    add r5, r2, #2
-y:		add r2, r2, #1
-x:		add r1, r1, #1	
-		str r1, [r0]
-		str r2, [r0, #4]
-		str r3, [r0, #8]
-		
-		cmp r1, r4
-		bne x
-		sub r1, r1, #2
-		cmp r2, r5
-		bne y
-		
-		str	r3, [r0, #12]
-	
-		b space		
 	
 	
 	
