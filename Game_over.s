@@ -368,8 +368,8 @@ devam:
 	b finish
 
 kare3:
-	    add r3, r3, #5
-	    mul r3, r3, r1
+	     add r3, r3, #20
+	   
 	    
 	    sub r2, r2, #1
 	    sub r1, r1, #1
@@ -401,12 +401,11 @@ z:		add r1, r1, #120
 		bls z
 
 		movs	r1, #88
- 		movs	r2, #120	
+ 		movs	r2, #117	
 		add  r6, r2, #6
 		add  r6, r6, #6
  		movs r7, #1
 		
-		add r3, r3, #1
+		add r3, r3, #200
 		lsl r0, r0, #4
 b Game_over
-
