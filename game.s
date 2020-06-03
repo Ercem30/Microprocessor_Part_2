@@ -620,8 +620,8 @@ lcun4:
 .balign 4
 enemy_ram: .word 992
 e_wait:    .word 400
-e1_time:   .word 1000
-e2_time:   .word 600
+e1_time:   .word 500
+e2_time:   .word 620
 //-------------------------------------------------------------
 show_life_points:
 		ldr r7, [sp, #4] //how many lifes left
@@ -854,6 +854,13 @@ up_fire_4:
 lcun3:
 		add r4, r4, #1 //increment counter
 b up_en_fire_cont
+//-------------------------------------------------------------
+.balign 4
+exit1: .word 260
+exit2: .word 300
+exit3: .word 255
+exit4: .word 284
+exit5: .word 275
 //-------------------------------------------------------------
 update_player:
 		ldr r2, [sp, #12]
