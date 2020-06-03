@@ -66,11 +66,6 @@ ret2:							         						            			//      972 -> fire 2 pos, row
 		str  r7, [sp, #84]  //enemy 3 not set
 		str  r7, [sp, #80]  //enemy 4 not set
 		str  r7, [sp, #76]  //enemy 5 not set
-		str  r7, [sp, #72]  //enemy timer 1 set
-		str  r7, [sp, #68]  //enemy timer 2 set
-		str  r7, [sp, #64]  //enemy timer 3 set
-		str  r7, [sp, #60]  //enemy timer 4 set
-		str  r7, [sp, #56]  //enemy timer 5 set
 		movs r7, #3
 		str  r7, [sp, #4]   //assign 3 life points
 
