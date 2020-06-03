@@ -39,10 +39,19 @@ ret2:							         						            			//      972 -> fire 2 pos, row
 		str  r7, [sp, #960]
 		add  r7, r7, #7
 		str  r7, [sp, #948]
+		movs r7, #75
+		str  r7, [sp, #944] //load enemy 4 to RAM
+		add  r7, r7, #10
+		str  r7, [sp, #932]
+		movs r7, #150
+		str  r7, [sp, #940]
+		add  r7, r7, #7
+		str  r7, [sp, #928]
 		movs r7, #1
 		str  r7, [sp, #996] //enemy1 is alive
 		str  r7, [sp, #976] //enemy2 is alive
-		str  r7, [sp, #956]
+		str  r7, [sp, #956] //enemy3 is alive
+		str  r7, [sp, #936] //enemy4 is alive
 		str  r7, [sp, #16]  //player is alive,
 		str  r7, [sp, #20]  //1 means moves left
 		movs r7, #0
@@ -299,6 +308,8 @@ show_enemy:
 		beq   en2
 		cmp   r4, #2
 		beq   en3
+		cmp   r4, #3
+		beq   en4
 		movs  r4, #0
 		str   r4, [sp, #12] //reset counter
 		b f8
@@ -339,6 +350,19 @@ en3:ldr r1, [sp, #964]
    cmp   r5, #1
 	 beq   enemy_cont
 	 b lcun1
+
+en4:ldr r1, [sp, #944]
+	  cmp r1, #10
+	 	blt lcun1
+	 	movs  r7, #0  //draw enemy 3
+	  ldr   r5, [sp, #936] //is the enemy dead?
+	  ldr   r1, [sp, #944]
+	  ldr   r2, [sp, #940]
+	 	ldr 	 r6, [sp, #944]
+	 	ldr   r7, [sp, #940]
+	  cmp   r5, #1
+	 	beq   enemy_cont
+	 	b lcun1
 
 enemy_cont:
 		str 	r6, [r0]
@@ -407,6 +431,8 @@ update_enemy_cont:
 		beq up_en_2
 		cmp r2, #2
 		beq up_en_3
+		cmp r2, #3
+		beq up_en_4
 		movs r2, #0
 		str r2, [sp, #12]
 		b f10
@@ -434,6 +460,13 @@ up_en_3:
 		ldr r4, [sp, #964] //enemy position
 		ldr r5, [sp, #960]
 		ldr r3, [sp, #956]  //is enemy dead
+		b update_chain1
+up_en_4:
+		ldr r6, [sp, #1012] //fire position
+		ldr r7, [sp, #1008]
+		ldr r4, [sp, #944] //enemy position
+		ldr r5, [sp, #940]
+		ldr r3, [sp, #936]  //is enemy dead
 		b update_chain1
 
 update_chain1:
@@ -466,6 +499,8 @@ kill_enemy:
 		beq kill2
 		cmp r2, #2
 		beq kill3
+		cmp r2, #3
+		beq kill4
 		movs r2, #0
 		str r2, [sp, #12]
 		b f10
@@ -487,6 +522,10 @@ kill2:
 kill3:
 		movs r1, #0
 		str r1, [sp, #956]
+		b lcun4_ld
+kill4:
+		movs r1, #0
+		str r1, [sp, #936]
 		b lcun4_ld
 
 lcun4_ld:
@@ -564,6 +603,8 @@ enemy_fire_cont:
 		beq   f_en2
 		cmp   r4, #2
 		beq   f_en3
+		cmp   r4, #3
+		beq   f_en4
 		movs  r4, #0
 		str   r4, [sp, #12] //reset counter
 		b f11
@@ -613,6 +654,20 @@ f_en3_fire:
 		movs r7, #0
 		b draw_fire_enemy
 
+f_en4:
+		ldr  r5, [sp, #932] //row data
+		movs r7, r5
+		ldr  r6, [sp, #928] //column data
+		ldr  r1, [sp, #932] //is enemy dead
+		cmp  r1, #255
+		bls  f_en4_fire
+		b lcun2
+f_en4_fire:
+		add  r7, r7, #1
+		str  r7, [sp, #932]
+		movs r7, #0
+		b draw_fire_enemy
+
 draw_fire_enemy:
 		str	r5, [r0]
 		str	r6, [r0, #4]
@@ -640,6 +695,8 @@ up_en_fire_cont:
 		beq uef2
 		cmp r4, #2
 		beq uef3
+		cmp r4, #3
+		beq uef4
 		movs r4, #0
 		str r4, [sp, #12] //reset counter
 e_u_e:
@@ -702,6 +759,25 @@ up_fire_3:
 		str r6, [sp, #948]
 		b lcun3
 
+uef4:
+	  ldr r7, [sp, #932]
+		cmp r7, #255
+		bhs uef4_1
+		b lcun3
+uef4_1:
+		ldr r7, [sp, #936]
+		cmp r7, #1  //if enemy alive, update fire
+		beq up_fire_4
+		b lcun3
+up_fire_4:
+		ldr r5, [sp, #944] //row data
+		ldr r6, [sp, #940] //column data
+		add r6, r6, #7
+		add r5, r5, #10
+		str r5, [sp, #932] //reset fire position to enemy position
+		str r6, [sp, #928]
+		b lcun3
+
 lcun3:
 		add r4, r4, #1 //increment counter
 b up_en_fire_cont
@@ -711,7 +787,7 @@ update_player:
 
 		ldr r1, [sp, #16] //is player dead?
 		cmp r1, #0 //if dead
-		beq reset_player
+		beq reset_player_j
 
 update_player_cont:
 		cmp r2, #0
@@ -720,9 +796,13 @@ update_player_cont:
 		beq up_pl_2
 		cmp r2, #2
 		beq up_pl_3
+		cmp r2, #3
+		beq up_pl_4
 		movs r2, #0
 		str r2, [sp, #12]
 		b f4
+
+reset_player_j: b reset_player
 
 up_pl_1:
 		ldr r6, [sp, #992] //fire position
@@ -747,6 +827,14 @@ up_pl_3:
 		ldr r4, [sp, #1020] //player position
 		ldr r5, [sp, #1016]
 		ldr r3, [sp, #956]
+		b update_chain_2
+up_pl_4:
+		ldr r6, [sp, #932] //fire position
+		add r6, r6, #4
+		ldr r7, [sp, #928]
+		ldr r4, [sp, #1020] //player position
+		ldr r5, [sp, #1016]
+		ldr r3, [sp, #936]
 		b update_chain_2
 
 update_chain_2:
@@ -779,6 +867,8 @@ kill_player:
 		beq killp2
 		cmp r2, #2
 		beq killp3
+		cmp r2, #3
+		beq killp4
 		movs r2, #0
 		str r2, [sp, #12]
 		b f4
@@ -833,6 +923,23 @@ killp3:
 		add r6, r6, #7
 		str r5, [sp, #952]
 		str r6, [sp, #948] //update fire
+		b lcun5
+killp4:
+		movs r1, #150
+		add r1, r1, #150
+		str r1, [sp, #1020]
+		sub r1, r1, #200
+		str r1, [sp, #1016]
+		movs r1, #0
+		str r1, [sp, #16]  //player is dead
+		ldr r1, [sp, #4]    //life points
+		sub r1, r1, #1
+		str r1, [sp, #4]    //update life points
+		ldr r5, [sp, #944] //row data
+		ldr r6, [sp, #940] //column data
+		add r6, r6, #7
+		str r5, [sp, #932]
+		str r6, [sp, #928] //update fire
 		b lcun5
 lcun5:
 		add r2, r2, #1
