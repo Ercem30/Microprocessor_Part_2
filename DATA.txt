@@ -1,0 +1,50 @@
+//RAM DATA
+//window size: 320x240
+//RAM: 1020 -> row value
+//     1016 -> column value
+//     1012 -> fire position, row
+//     1008 -> fire position, col
+//     1004 -> enemy 1, row position
+//     1000 -> enemy 1, col position
+//      996 -> enemy 1, is dead? T = 0
+//      992 -> fire 1 pos, row
+//      988 -> fire 2 pos, col
+//			984 -> enemy 2, row position
+//			980 -> enemy 2, col position
+//      976 -> enemy 2, is dead
+//      972 -> fire 2 pos, row
+//      968 -> fire 2 pos, col
+//      964 -> enemy 3, row position
+//      960 -> enemy 3, col position
+//      956 -> enemy 3, is dead
+//      952 -> fire 3 pos, row
+//      948 -> fire 3 pos, col
+//      944 -> enemy 4, row position
+//      940 -> enemy 4, col position
+//      936 -> enemy 4, is dead
+//      932 -> fire 4 pos, row
+//      928 -> fire 4 pos, col
+
+
+//     104 -> counter, enemy 2
+//     100 -> counter, enemy 1
+//      96 -> is player ready, =1 yes
+//      92 -> is enemy 1 ready
+//      88 -> is enemy 2 ready
+//      84 -> is enemy 3 ready
+//      80 -> is enemy 4 ready
+//      76 -> is enemy 5 ready
+//      72 -> enemy 1 timer 1
+//      68 -> enemy 2 timer 2
+//      64 -> enemy 3 timer 3
+//      60 -> enemy 4 timer 4
+//      56 -> enemy 5 timer 5
+
+
+//      24 -> direction buffer, 2
+//      20 -> direction buffer, 1
+//      16 -> is player dead?, T = 0
+//      12 -> local counter
+//       8 -> timer
+//       4 -> life points
+//      current state: f14
