@@ -2072,8 +2072,8 @@ white2:           .word 0xFFFFFFFF //white
 start:
 ldr	r0, =0x40010000
 
-		movs	r1, #88
-		movs	r2, #100
+		movs	r1, #100
+		movs	r2, #103
 		ldr r3, = 0xFFFFFFFF
 		movs r7, #0
 
@@ -2308,11 +2308,11 @@ z_sp:
 	cmp r1, r0
 	bls z_sp
 
-	movs	r1, #88
-	movs	r2, #100
+	movs	r1, #100
+	movs	r2, #101
 	add  r6, r2, #6
 	add  r6, r6, #6
-	movs r7, #1
+	movs r7, #0
 
 	add r3, r3, #1
 	lsl r0, r0, #4
