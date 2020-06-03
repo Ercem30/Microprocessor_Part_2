@@ -4,6 +4,7 @@
 //     1016 -> column value
 //     1012 -> fire position, row
 //     1008 -> fire position, col
+
 //     1004 -> enemy 1, row position
 //     1000 -> enemy 1, col position
 //      996 -> enemy 1, is dead? T = 0
@@ -24,7 +25,11 @@
 //      936 -> enemy 4, is dead
 //      932 -> fire 4 pos, row
 //      928 -> fire 4 pos, col
-
+//      924 -> enemy 5, row position
+//      920 -> enemy 5, col position
+//      916 -> enemy 5, is dead
+//      912 -> fire 5 pos, row
+//      908 -> fire 5 pos, col
 
 //     104 -> counter, enemy 2
 //     100 -> counter, enemy 1
