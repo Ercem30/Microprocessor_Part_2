@@ -879,7 +879,7 @@ atla120:cmp r1,#120
 		b	kare2		
 atla121:			
 		str	r3, [r0, #12]
-timer:	movs r5,#0			//gecikme
+timer:	movs r5,#0			//sonsuz loop- ana kodda bu silinecek ekran kapanmasın diye koydum
 		add	r5, r5, #1
 		cmp	r5, #100
 		bne timer
