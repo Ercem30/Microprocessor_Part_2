@@ -3,8 +3,15 @@ reset_vector:      .word    initialize
 initialize:
 		movs r1, #20
 		str r1, [sp, #208]
+		add r1, r1, #30
+		str r1, [sp, #196]
+		str r1, [sp, #188]
 		movs r1, #140
 	  str r1, [sp, #204]
+		add r1, r1, #13
+		str r1, [sp, #192]
+		add r1, r1, #19
+		str r1, [sp, #184]
 		movs r1, #150    //initialization
 		add  r1, r1, #150
 		movs r2, #106
@@ -134,10 +141,11 @@ f10:  b update_enemy_fire_jump  // -> f12
 f12:	b update_player_jump        // -> f4
 f4:		b check_boss_level_jump
 f16:	b update_boss_hit_jump
-f18:	str	r3, [r0, #12]
+f18:	b update_fire_boss_jump
+f19:	str	r3, [r0, #12]
 			ldr r7, [sp, #32]
 			cmp r7, #10
-		  bhs you_win_page
+		  bhs you_win_page_reset
       b main_loop_2
 show:
 			str	r3, [r0, #12]    //refresh the screen
@@ -149,13 +157,27 @@ f3:		b show_enemy         // -> f8
       str	r3, [r0, #12]
 f8:   ldr r7, [sp, #1012]  //show fire
   		cmp r7, #0
-  		bhi show_fire        // -> f5
+  		bhi show_fire_jj        // -> f5
 f5:   b show_enemy_fire_jump  // -> f11
-f11:  b show_boss_jump
+f11:  b show_boss_fire_jump
+f20:	b show_boss_jump
 f17:
 			str	r3, [r0, #12]
 			b delay                   // -> f6
 f6:   b f1
+
+show_fire_jj: b show_fire
+//-------------------------------------------------------------
+you_win_page_reset:
+		movs r7, #3
+		str r7, [sp, #200]
+		ldr r7, [sp, #1020]
+		movs r6, #0
+		cmp r7, r6
+		blt you_win_page
+		sub r7, r7, #1
+		str r7, [sp, #1020]
+		b main_loop_2
 //-------------------------------------------------------------
 set_player:
 			ldr r7, [sp, #200]
@@ -181,6 +203,8 @@ update_movement:
 		ldr r2, [sp, #200]
 		orr r1, r1, r2
 		cmp r1, #0
+		beq f2
+		cmp r2, #3
 		beq f2
 
 		ldr r1, [sp, #16]
@@ -232,6 +256,8 @@ collide:
 		orr r1, r1, r2
 		cmp r1, #0
 		beq f7
+		cmp r2, #3
+		beq f7
 
 		movs r5, #0
 		movs r6, #0
@@ -273,12 +299,16 @@ update_fire:
 		beq cont_update_fire_p
 		b f9
 cont_update_fire_p:
+		ldr r7, [sp, #200]
+		cmp r7, #3
+		beq f9_exit
     ldr r5, [sp, #1020] //row data
 		ldr r6, [sp, #1016] //column data
 		add r6, r6, #6
 		str r5, [sp, #1012]
 		str r6, [sp, #1008]
-b f9
+f9_exit:
+		b f9
 //-------------------------------------------------------------
 show_charater:
 		ldr   r5, [sp, #16] //is the enemy dead?
@@ -290,19 +320,25 @@ player_cont:
     ldr 	r1, [sp, #1020]
     ldr 	r2, [sp, #1016]
 		cmp   r1, #230
-		bls   draw_game_character_p
+		bls   draw_game_character_p_jj
 		b f3
+draw_game_character_p_jj: b draw_game_character_p_j
 //-------------------------------------------------------------
 delay:
     movs r7, #0
 		ldr  r6, delay_constant
 delay_loop:
     cmp  r7, r6
-    beq  f6
+    beq  f6_exit
     add  r7, r7, #1
     b delay_loop
+f6_exit: b f6
 //-------------------------------------------------------------
 show_fire:
+		ldr r7, [sp, #200]
+		cmp r7, #3
+		beq e_show_fire
+
 		ldr r1, [sp, #96]
 		cmp r1, #0
 		beq e_show_fire
@@ -331,10 +367,12 @@ e_show_fire:
 show_enemy_fire_jump: b show_enemy_fire
 update_enemy_fire_jump: b update_enemy_fire
 update_player_jump: b update_player
-ldr_r0_1: b ldr_r0_2
-ldr_r3_1: b ldr_r3_2
+ldr_r0_1: b ldr_r0_2_j
+ldr_r3_1: b ldr_r3_2_j
 show_life_points_jump: b show_life_points
 update_boss_hit_jump: b update_boss_hit
+update_fire_boss_jump: b update_fire_boss
+show_boss_fire_jump: b show_boss_fire
 //-------------------------------------------------------------
 .balign 4
 delay_constant:  .word 5000
@@ -424,7 +462,7 @@ en5:ldr r1, [sp, #924]
 enemy_cont:
 		str 	r6, [r0]
 		str 	r7, [r0, #4]
-		b draw_game_enemy_jump
+		b draw_game_enemy_jump_j
 end_game_enemy:
 
 		movs r7, r2
@@ -435,7 +473,6 @@ lcun1:
 		str r7, [sp, #12] //update counter
 b show_enemy
 //-------------------------------------------------------------
-draw_game_character_p:    b draw_game_character
 e1_time_ldr: ldr r1, e1_time
 						 b e1_t_ret
 e2_time_ldr: ldr r1, e2_time
@@ -444,6 +481,7 @@ check_boss_level_jump: b check_boss_level
 f16_j: b f16
 show_boss_jump: b show_boss_jump_1
 f17_j1: b f17
+draw_game_character_p_j: b draw_game_character_p
 //-------------------------------------------------------------
 update_boss_hit:
 ldr r7, [sp, #200]
@@ -501,6 +539,122 @@ lcun4_ld_pl_b:
 		str r5, [sp, #1012]
 		str r6, [sp, #1008] //update fire
 		b f18
+//-------------------------------------------------------------
+update_fire_boss:
+		ldr r7, [sp, #200]
+		cmp r7, #2
+		bne f19_exit
+
+		ldr r4, [sp, #12]  //load counter
+		ldr r7, [sp, #96]
+		cmp r7, #0
+		beq f19_exit
+
+up_boss_fire_cont:
+		cmp r4, #0
+		beq ubf1
+		cmp r4, #1
+		beq ubf2
+		movs r4, #0
+		str r4, [sp, #12] //reset counter
+		b f19
+
+ubf1:
+		ldr r7, [sp, #196]
+		cmp r7, #255
+		bhs up_fire_1_b
+		b lcun_boss_1
+up_fire_1_b:
+		ldr r5, [sp, #208] //row data
+		ldr r6, [sp, #204] //column data
+		add r6, r6, #13
+    add r5, r5, #30
+		str r5, [sp, #196] //reset fire position to boss position
+		str r6, [sp, #192]
+		b lcun_boss_1
+
+ubf2:
+	  ldr r7, [sp, #188]
+		cmp r7, #255
+		bhs up_fire_2_b
+		b lcun_boss_1
+up_fire_2_b:
+		ldr r5, [sp, #208] //row data
+		ldr r6, [sp, #204] //column data
+		add r6, r6, #32
+		add r5, r5, #30
+		str r5, [sp, #188] //reset fire position to enemy position
+		str r6, [sp, #184]
+		b lcun_boss_1
+
+lcun_boss_1:
+		add r4, r4, #1 //increment counter
+		b up_boss_fire_cont
+
+f19_exit:
+		b f19
+//-------------------------------------------------------------
+show_boss_fire:
+		ldr r7, [sp, #200]
+		cmp r7, #2
+		bne f20_exit
+
+		ldr r4, [sp, #12]  //load counter
+		b ldr_r3_4b
+
+boss_fire_cont:
+		cmp   r4, #0
+		beq   f_b1
+		cmp   r4, #1
+		beq   f_b2
+		movs  r4, #0
+		str   r4, [sp, #12] //reset counter
+		b f20_exit
+
+f_b1:
+		ldr  r5, [sp, #196] //row data
+		movs r7, r5
+		ldr  r6, [sp, #192] //column data
+		ldr  r1, [sp, #196]
+		cmp  r1, #255
+		bls  f_b1_fire
+		b lcun_boss_2
+f_b1_fire:
+		add  r7, r7, #1
+		str  r7, [sp, #196]
+		movs r7, #0
+		b draw_fire_boss
+
+f_b2:
+		ldr  r5, [sp, #188] //row data
+		movs r7, r5
+		ldr  r6, [sp, #184] //column data
+		ldr  r1, [sp, #188] //is enemy dead
+		cmp  r1, #255
+		bls  f_b2_fire
+		b lcun_boss_2
+f_b2_fire:
+		add  r7, r7, #1
+		str  r7, [sp, #188]
+		movs r7, #0
+		b draw_fire_boss
+
+draw_fire_boss:
+		str	r5, [r0]
+		str	r6, [r0, #4]
+		str	r3, [r0, #8]
+		add r7, r7, #1
+		sub r5, r5, #1
+		cmp r7, #4
+		bne draw_fire_boss
+lcun_boss_2:
+		movs r7, #0
+		str r3, [r0, #12]
+		add r4, r4, #1  //increment counter
+		b boss_fire_cont
+
+f20_exit:
+		b f20
 //-------------------------------------------------------------
 set_enemy:
 		ldr r2, [sp, #200]
@@ -663,6 +817,10 @@ you_win_jump_1: b you_win_jump_2
 start_jump_1: b start_jump_2
 main_jump_3: b main_loop
 ldr_f4_j: b f4
+ldr_r3_2_j: b ldr_r3_2
+ldr_r0_2_j: b ldr_r0_2
+draw_game_enemy_jump_j: b draw_game_enemy_jump
+draw_game_character_p:    b draw_game_character
 //-------------------------------------------------------------
 update_enemy:
 		ldr r7, [sp, #200]
@@ -984,14 +1142,14 @@ move_boss_cont:
 move_boss_right:
 		add r7, r7, #1
 		str r7, [sp, #204]
-		movs r6, #200
+		movs r6, #250
 		cmp r7, r6
 		bhs assign_1_boss
 		b exit_move_boss
 move_boss_left:
 		sub r7, r7, #1
 		str r7, [sp, #204]
-		cmp r7, #100
+		cmp r7, #60
 		bls assign_0_boss
 		b exit_move_boss
 
@@ -1037,6 +1195,7 @@ ret3_j: b ret3
 f17_j2: b f17_j1
 show_boss_jump_1: b show_boss_jump_2
 ldr_r3_3: b ldr_r3_3_j
+end_game_enemy_j: b end_game_enemy
 //-------------------------------------------------------------
 show_enemy_fire:
 		ldr r7, [sp, #200]
@@ -1301,9 +1460,9 @@ update_player:
 		cmp r1, #0 //if dead
 		beq reset_player_j
 
-		ldr r7, [sp, #200]
-		cmp r7, #2
-		beq boss_mechanics_j
+//		ldr r7, [sp, #200]
+//		cmp r7, #2
+//		beq boss_mechanics_j
 
 update_player_cont:
 		cmp r2, #0
@@ -1314,11 +1473,11 @@ update_player_cont:
 		beq up_pl_3
 		cmp r2, #3
 		beq up_pl_4
+		cmp r2, #4
+		beq up_pl_5
 		movs r2, #0
 		str r2, [sp, #12]
-		b f4
-
-boss_mechanics_j: b boss_mechanics
+		b ldr_f4_j
 
 reset_player_j: b reset_player
 
@@ -1354,6 +1513,14 @@ up_pl_4:
 		ldr r5, [sp, #1016]
 		ldr r3, [sp, #936]
 		b update_chain_2
+up_pl_5:
+		ldr r6, [sp, #912] //fire position
+		add r6, r6, #4
+		ldr r7, [sp, #908]
+		ldr r4, [sp, #1020] //player position
+		ldr r5, [sp, #1016]
+		ldr r3, [sp, #916]
+		b update_chain_2
 
 update_chain_2:
 		cmp r7, r5
@@ -1373,10 +1540,6 @@ checkp3:
 		cmp r6, r4
 		bls kill_player//checkp4
 		b lcun5
-/*checkp4:
-		cmp r3, #1
-		beq kill_player
-		b lcun5*/
 
 kill_player:
 		cmp r2, #0
@@ -1387,15 +1550,18 @@ kill_player:
 		beq killp3
 		cmp r2, #3
 		beq killp4
+		cmp r2, #4
+		beq killp5
 		movs r2, #0
 		str r2, [sp, #12]
-		b f4
+		b ldr_f4_j
 
 killp1:
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
-		sub r1, r1, #200
+		sub r1, r1, #250
+		sub r1, r1, #50
 		str r1, [sp, #1016]
 		movs r1, #0
 		str r1, [sp, #16]   //player is dead
@@ -1412,7 +1578,8 @@ killp2:
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
-		sub r1, r1, #200
+		sub r1, r1, #250
+		sub r1, r1, #50
 		str r1, [sp, #1016]
 		movs r1, #0
 		str r1, [sp, #16]  //player is dead
@@ -1429,7 +1596,8 @@ killp3:
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
-		sub r1, r1, #200
+		sub r1, r1, #250
+		sub r1, r1, #50
 		str r1, [sp, #1016]
 		movs r1, #0
 		str r1, [sp, #16]  //player is dead
@@ -1446,7 +1614,8 @@ killp4:
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
-		sub r1, r1, #200
+		sub r1, r1, #250
+		sub r1, r1, #50
 		str r1, [sp, #1016]
 		movs r1, #0
 		str r1, [sp, #16]  //player is dead
@@ -1459,12 +1628,28 @@ killp4:
 		str r5, [sp, #932]
 		str r6, [sp, #928] //update fire
 		b lcun5
+killp5:
+		movs r1, #150
+		add r1, r1, #150
+		str r1, [sp, #1020]
+		sub r1, r1, #250
+		sub r1, r1, #50
+		str r1, [sp, #1016]
+		movs r1, #0
+		str r1, [sp, #16]  //player is dead
+		ldr r1, [sp, #4]    //life points
+		sub r1, r1, #1
+		str r1, [sp, #4]    //update life points
+		ldr r5, [sp, #924] //row data
+		ldr r6, [sp, #920] //column data
+		add r6, r6, #7
+		str r5, [sp, #912]
+		str r6, [sp, #908] //update fire
+		b lcun5
+		
 lcun5:
 		add r2, r2, #1
 		b update_player_cont
-
-boss_mechanics:
-		b ldr_f4_j
 //------------------------------------------------------------
 reset_player:
 		ldr r1, [sp, #8]
@@ -1603,8 +1788,10 @@ ldr_r3_3_j: ldr r3, green
 					b ret3_j
 ldr_r3_4: ldr r3, red
 					b enemy_fire_cont
+ldr_r3_4b: ldr r3, red
+					b boss_fire_cont
 draw_game_enemy_jump: b draw_game_enemy
-end_game_enemy_jump: b end_game_enemy
+end_game_enemy_jump: b end_game_enemy_j
 game_over_jump_2: b game_over
 you_win_jump_2: b you_win_jump_3
 start_jump_2: b start_jump_3
@@ -3769,7 +3956,7 @@ per2: .word 0x40010000
 whi2: .word 0xFFFFFFFF
 //------------------------------------------------------------
 you_win_s:
-ldr	r0, =0x40010000
+		ldr	r0, =0x40010000
 
 		movs	r1, #88
  		movs	r2, #120
