@@ -6,12 +6,16 @@ initialize:
 		add r1, r1, #30
 		str r1, [sp, #196]
 		str r1, [sp, #188]
+		add r1, r1, #14
+		str r1, [sp, #180]
 		movs r1, #140
 	  str r1, [sp, #204]
 		add r1, r1, #13
 		str r1, [sp, #192]
 		add r1, r1, #19
 		str r1, [sp, #184]
+		movs r1, #158
+		str  r1, [sp, #176]
 		movs r1, #150    //initialization
 		add  r1, r1, #150
 		movs r2, #106
@@ -63,6 +67,8 @@ ret2:
 		str  r7, [sp, #16]  //player is alive
 		str  r7, [sp, #20]  //1 means moves left
 		movs r7, #0
+		str  r7, [sp, #168]
+		str  r7, [sp, #172]
 		str  r7, [sp, #200]
 		str  r7, [sp, #32]
 		str  r7, [sp, #28]  //zero kills, yet...
@@ -607,6 +613,8 @@ boss_fire_cont:
 		beq   f_b1
 		cmp   r4, #1
 		beq   f_b2
+		cmp   r4, #2
+		beq   f_b3
 		movs  r4, #0
 		str   r4, [sp, #12] //reset counter
 		b f20_exit
@@ -629,7 +637,7 @@ f_b2:
 		ldr  r5, [sp, #188] //row data
 		movs r7, r5
 		ldr  r6, [sp, #184] //column data
-		ldr  r1, [sp, #188] //is enemy dead
+		ldr  r1, [sp, #188]
 		cmp  r1, #255
 		bls  f_b2_fire
 		b lcun_boss_2
@@ -639,6 +647,29 @@ f_b2_fire:
 		movs r7, #0
 		b draw_fire_boss
 
+f_b3:
+		movs r6, #200
+		add r6, r6, #200
+		add r6, r6, #100
+		ldr  r7, [sp, #172]
+		cmp  r7, r6
+		bls  laser_timer_inc
+		add r6, r6, #100
+		cmp  r7, r6
+		bls  draw_laser_boss
+		cmp  r7, r6
+		bhi  reset_laser_timer
+		b lcun_boss_2
+laser_timer_inc:
+		add r7, r7, #1
+		str r7, [sp, #172]
+		b lcun_boss_2
+reset_laser_timer:
+		movs r7, #0
+		str r7, [sp, #168]
+		str r7, [sp, #172]
+		b lcun_boss_2
+
 draw_fire_boss:
 		str	r5, [r0]
 		str	r6, [r0, #4]
@@ -647,6 +678,40 @@ draw_fire_boss:
 		sub r5, r5, #1
 		cmp r7, #4
 		bne draw_fire_boss
+		b lcun_boss_2
+
+draw_laser_boss:
+		movs r5, #1
+		str r5, [sp, #168]
+		add r7, r7, #1
+		str r7, [sp, #172]
+		ldr  r5, [sp, #180] //row data
+		ldr  r6, [sp, #176] //column data
+		b ldr_r3_white_boss_j
+return_laser:
+		str   r5, [r0]
+		str 	r6, [r0, #4]
+		str	  r3, [r0, #8]
+		movs r1, #200
+		movs r2, #9
+		add r1, r1, r5
+		add r2, r2, r6
+b_laser:
+		add	r6, r6, #1
+a_laser:
+		add	r5, r5, #1
+		str	r5, [r0]
+		str	r6, [r0, #4]
+		str	r3, [r0, #8]
+
+		cmp	r5, r1
+		bne	a_laser
+		ldr r5, [sp, #180]
+		cmp	r6, r2
+		bne	b_laser
+		ldr r6, [sp, #176]
+    b lcun_boss_2
+
 lcun_boss_2:
 		movs r7, #0
 		str r3, [r0, #12]
@@ -822,6 +887,7 @@ ldr_r0_2_j: b ldr_r0_2
 draw_game_enemy_jump_j: b draw_game_enemy_jump
 draw_game_character_p:    b draw_game_character
 boss_fire_cont_j: b boss_fire_cont
+f12_j: b f12
 //-------------------------------------------------------------
 update_enemy:
 		ldr r7, [sp, #200]
@@ -1039,7 +1105,7 @@ e2_time:   .word 620
 //-------------------------------------------------------------
 check_boss_level:
 		ldr r7, [sp, #28]
-		cmp r7, #2
+		cmp r7, #10
 		bhs reset_enemies
 		ldr r7, [sp, #200]
 		cmp r7, #1
@@ -1134,6 +1200,7 @@ move_boss_cont:
 		str r5, [sp, #104]
 		ldr r1, [sp, #24]
 		ldr r7, [sp, #204]
+		ldr r6, [sp, #176]
 		cmp r1, #0
 		beq move_boss_right
 		cmp r1, #1
@@ -1142,6 +1209,8 @@ move_boss_cont:
 
 move_boss_right:
 		add r7, r7, #1
+		add r6, r6, #1
+		str r6, [sp, #176]
 		str r7, [sp, #204]
 		movs r6, #250
 		cmp r7, r6
@@ -1149,6 +1218,8 @@ move_boss_right:
 		b exit_move_boss
 move_boss_left:
 		sub r7, r7, #1
+		sub r6, r6, #1
+		str r6, [sp, #176]
 		str r7, [sp, #204]
 		cmp r7, #60
 		bls assign_0_boss
@@ -1198,6 +1269,8 @@ show_boss_jump_1: b show_boss_jump_2
 ldr_r3_3: b ldr_r3_3_j
 end_game_enemy_j: b end_game_enemy
 ldr_r3_4b_j: b ldr_r3_4b
+return_laser_j: b return_laser
+ldr_r3_white_boss_j: b ldr_r3_white_boss
 //-------------------------------------------------------------
 show_enemy_fire:
 		ldr r7, [sp, #200]
@@ -1347,7 +1420,7 @@ up_en_fire_cont:
 		movs r4, #0
 		str r4, [sp, #12] //reset counter
 e_u_e:
-		b f12
+		b f12_j
 
 uef1:
     ldr r7, [sp, #992]
@@ -1658,6 +1731,8 @@ boss_kill_player:
 		beq up_pl_1b
 		cmp r2, #1
 		beq up_pl_2b
+		cmp r2, #2
+		beq up_pl_3b
 		movs r2, #0
 		str r2, [sp, #12]
 		b ldr_f4_j
@@ -1676,6 +1751,10 @@ up_pl_2b:
 		ldr r4, [sp, #1020] //player position
 		ldr r5, [sp, #1016]
 		b update_chain_2b
+up_pl_3b:
+		ldr r7, [sp, #176]
+		ldr r5, [sp, #1016]
+		b update_chain_3b
 
 update_chain_2b:
 		cmp r7, r5
@@ -1696,11 +1775,30 @@ checkp3b:
 		bls kill_player_b //checkp4
 		b lcun5
 
+update_chain_3b:
+		add r5, r5, #12
+		cmp r5, r7
+		bhs checkp1b_1
+		b lcun5
+checkp1b_1:
+		ldr r5, [sp, #1016]
+		add r7, r7, #9
+		cmp r5, r7
+		bls checkp2b_1
+		b lcun5
+checkp2b_1:
+		ldr r5, [sp, #168]
+		cmp r5, #1
+		beq kill_player_b
+		b lcun5
+
 kill_player_b:
 		cmp r2, #0
 		beq killp1b
 		cmp r2, #1
 		beq killp2b
+		cmp r2, #2
+		beq killp3b
 		movs r2, #0
 		str r2, [sp, #12]
 		b ldr_f4_j
@@ -1742,6 +1840,11 @@ killp2b:
 		add r5, r5, #30
 		str r5, [sp, #188]
 		str r6, [sp, #184] //update fire
+		b lcun5
+killp3b:
+		movs r1, #0
+		str r1, [sp, #16]  //player is dead
+		str r1, [sp, #4]    //life points = 0
 		b lcun5
 
 lcun5:
@@ -1897,6 +2000,8 @@ start_jump_2: b start_jump_3
 main_jump_2: b main_jump_3
 f17_j3: b f17_j2
 show_boss_jump_2: b show_boss_jump_3
+ldr_r3_white_boss: ldr r3, white
+                   b return_laser_j
 //------------------------------------------------------------
 //next section of the code is dedicated to sprites and animation
 //------------------------------------------------------------
