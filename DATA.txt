@@ -41,6 +41,9 @@
 //      180 -> boss laser row
 //      176 -> boss laser col
 //      172 -> boss laser timer
+//      168 -> boss laser on/off = 1/0
+
+//      160 -> end timer
 
 //      104 -> counter, enemy 2
 //      100 -> counter, enemy 1
