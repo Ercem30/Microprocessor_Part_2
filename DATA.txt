@@ -31,20 +31,32 @@
 //      912 -> fire 5 pos, row
 //      908 -> fire 5 pos, col
 
-//     104 -> counter, enemy 2
-//     100 -> counter, enemy 1
-//      96 -> is player ready, =1 yes
-//      92 -> is enemy 1 ready
-//      88 -> is enemy 2 ready
-//      84 -> is enemy 3 ready
-//      80 -> is enemy 4 ready
-//      76 -> is enemy 5 ready
+//      208 -> boss row pos
+//      204 -> boss col pos
+//      200 -> boss is present
+//      196 -> boss fire 1 row
+//      192 -> boss fire 1 col
+//      188 -> boss fire 2 row
+//      184 -> boss fire 2 col
+//      180 -> boss laser row
+//      176 -> boss laser col
+//      172 -> boss laser timer
 
+//      104 -> counter, enemy 2
+//      100 -> counter, enemy 1
+//       96 -> is player ready, =1 yes
+//       92 -> is enemy 1 ready
+//       88 -> is enemy 2 ready
+//       84 -> is enemy 3 ready
+//       80 -> is enemy 4 ready
+//       76 -> is enemy 5 ready
 
-//      24 -> direction buffer, 2
-//      20 -> direction buffer, 1
-//      16 -> is player dead?, T = 0
-//      12 -> local counter
-//       8 -> timer
-//       4 -> life points
-//      current state: f14
+//       32 -> boss kill counter
+//       28 -> kill counter
+//       24 -> direction buffer, 2
+//       20 -> direction buffer, 1
+//       16 -> is player dead?, T = 0
+//       12 -> local counter
+//        8 -> timer
+//        4 -> life points
+//       current state: f20
