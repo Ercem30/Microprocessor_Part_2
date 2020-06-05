@@ -18,9 +18,13 @@ initialize:
 		str  r1, [sp, #176]
 		movs r1, #150    //initialization
 		add  r1, r1, #150
-		movs r2, #106
+		movs r2, #156
     str  r2, [sp, #1008]
 		str  r1, [sp, #1012]
+		str  r1, [sp, #132]
+		str  r1, [sp, #128]
+		str  r1, [sp, #116]
+		str  r1, [sp, #112]
 		sub  r2, r2, #6
 		str  r2, [sp, #1016]
 		str  r1, [sp, #1020]
@@ -67,6 +71,13 @@ ret2:
 		str  r7, [sp, #16]  //player is alive
 		str  r7, [sp, #20]  //1 means moves left
 		movs r7, #0
+		str  r7, [sp, #400]
+		str  r7, [sp, #156]
+		str  r7, [sp, #152]
+		str  r7, [sp, #148]
+		str  r7, [sp, #144]
+		str  r7, [sp, #140]
+		str  r7, [sp, #136]
 		str  r7, [sp, #168]
 		str  r7, [sp, #172]
 		str  r7, [sp, #200]
@@ -141,7 +152,7 @@ f14:  b update_movement    //update player position -> f2
 f2:   b collide            //check wall collision -> f7
 f7:   ldr r7, [sp, #1012]  //check if fire has expired
       cmp r7, #0
-      beq update_fire      // -> f9
+      beq update_fire_j      // -> f9
 f9:   b update_enemy       // -> f10 (update movement inside)
 f10:  b update_enemy_fire_jump  // -> f12
 f12:	b update_player_jump        // -> f4
@@ -167,12 +178,13 @@ f8:   ldr r7, [sp, #1012]  //show fire
 f5:   b show_enemy_fire_jump  // -> f11
 f11:  b show_boss_fire_jump
 f20:	b show_boss_jump
-f17:
-			str	r3, [r0, #12]
+f17:  b show_explosion_jump
+f21:	str	r3, [r0, #12]
 			b delay                   // -> f6
 f6:   b f1
 
 show_fire_jj: b show_fire
+update_fire_j: b update_fire
 //-------------------------------------------------------------
 you_win_page_reset:
 		movs r7, #3
@@ -486,6 +498,7 @@ e2_time_ldr: ldr r1, e2_time
 check_boss_level_jump: b check_boss_level
 f16_j: b f16
 show_boss_jump: b show_boss_jump_1
+show_explosion_jump: b show_explosion_jump_1
 f17_j1: b f17
 draw_game_character_p_j: b draw_game_character_p
 //-------------------------------------------------------------
@@ -888,6 +901,7 @@ draw_game_enemy_jump_j: b draw_game_enemy_jump
 draw_game_character_p:    b draw_game_character
 boss_fire_cont_j: b boss_fire_cont
 f12_j: b f12
+f21_jump5: b f21
 //-------------------------------------------------------------
 update_enemy:
 		ldr r7, [sp, #200]
@@ -1022,6 +1036,8 @@ kill1:
 		str r7, [sp, #992]
 		b lcun4_ld
 kill2:
+		ldr r1, [sp, #984]
+		str r1, [sp, #116]
 		movs r1, #0
 		str r1, [sp, #88]
 		ldr r1, [sp, #28]
@@ -1032,6 +1048,8 @@ kill2:
 		sub  r7, r7, r1
 		str r7, [sp, #984]
 		str r7, [sp, #972]
+		ldr r7, [sp, #980]
+		str r7, [sp, #132]
 		movs r7, #15
 		str r7, [sp, #980]
 		b lcun4_ld
@@ -1060,6 +1078,8 @@ kill4:
 		str r7, [sp, #932]
 		b lcun4_ld
 kill5:
+		ldr r1, [sp, #924]
+		str r1, [sp, #112]
 		movs r1, #0
 		str r1, [sp, #76]
 		ldr r1, [sp, #28]
@@ -1070,6 +1090,8 @@ kill5:
 		sub  r7, r7, r1
 		str r7, [sp, #924]
 		str r7, [sp, #912]
+		ldr r7, [sp, #920]
+		str r7, [sp, #128]
 		movs r7, #250
 		add r7, r7, #35
 		str r7, [sp, #920]
@@ -1266,6 +1288,8 @@ ret2_j: b ret2
 ret3_j: b ret3
 f17_j2: b f17_j1
 show_boss_jump_1: b show_boss_jump_2
+show_explosion_jump_1: b show_explosion_jump_2
+f21_jump4: b f21_jump5
 ldr_r3_3: b ldr_r3_3_j
 end_game_enemy_j: b end_game_enemy
 ldr_r3_4b_j: b ldr_r3_4b
@@ -1383,6 +1407,8 @@ f_en5_fire:
 		b draw_fire_enemy
 
 draw_fire_enemy:
+		movs r1, #1
+		str r1, [sp, #400]
 		str	r5, [r0]
 		str	r6, [r0, #4]
 		str	r3, [r0, #8]
@@ -1636,6 +1662,10 @@ kill_player:
 		b ldr_f4_j
 
 killp1:
+		ldr r1, [sp, #1020]
+		str r1, [sp, #124]
+		ldr r1, [sp, #1016]
+		str r1, [sp, #120]
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
@@ -1654,6 +1684,10 @@ killp1:
 		str r6, [sp, #988] //update fire
 		b lcun5
 killp2:
+		ldr r1, [sp, #1020]
+		str r1, [sp, #124]
+		ldr r1, [sp, #1016]
+		str r1, [sp, #120]
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
@@ -1672,6 +1706,10 @@ killp2:
 		str r6, [sp, #968] //update fire
 		b lcun5
 killp3:
+		ldr r1, [sp, #1020]
+		str r1, [sp, #124]
+		ldr r1, [sp, #1016]
+		str r1, [sp, #120]
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
@@ -1690,6 +1728,10 @@ killp3:
 		str r6, [sp, #948] //update fire
 		b lcun5
 killp4:
+		ldr r1, [sp, #1020]
+		str r1, [sp, #124]
+		ldr r1, [sp, #1016]
+		str r1, [sp, #120]
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
@@ -1708,6 +1750,10 @@ killp4:
 		str r6, [sp, #928] //update fire
 		b lcun5
 killp5:
+		ldr r1, [sp, #1020]
+		str r1, [sp, #124]
+		ldr r1, [sp, #1016]
+		str r1, [sp, #120]
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
@@ -1804,6 +1850,10 @@ kill_player_b:
 		b ldr_f4_j
 
 killp1b:
+		ldr r1, [sp, #1020]
+		str r1, [sp, #124]
+		ldr r1, [sp, #1016]
+		str r1, [sp, #120]
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
@@ -1823,6 +1873,10 @@ killp1b:
 		str r6, [sp, #192] //update fire
 		b lcun5
 killp2b:
+		ldr r1, [sp, #1020]
+		str r1, [sp, #124]
+		ldr r1, [sp, #1016]
+		str r1, [sp, #120]
 		movs r1, #150
 		add r1, r1, #150
 		str r1, [sp, #1020]
@@ -2000,6 +2054,8 @@ start_jump_2: b start_jump_3
 main_jump_2: b main_jump_3
 f17_j3: b f17_j2
 show_boss_jump_2: b show_boss_jump_3
+show_explosion_jump_2: b show_explosion_jump_3
+f21_jump3: b f21_jump4
 ldr_r3_white_boss: ldr r3, white
                    b return_laser_j
 //------------------------------------------------------------
@@ -2564,6 +2620,8 @@ start_jump_3: b start
 main_jump_1: b main_jump_2
 f17_j4: b f17_j3
 show_boss_jump_3: b show_boss
+show_explosion_jump_3: b show_explosion_jump_4
+f21_jump2: b f21_jump3
 you_win_jump_3: b you_win_jump_4
 //------------------------------------------------------------
 game_over:
@@ -3229,6 +3287,8 @@ b start_game
 //------------------------------------------------------------
 f17_j5: b f17_j4
 you_win_jump_4: b you_win_jump_5
+show_explosion_jump_4: b show_explosion_jump_5
+f21_jump1: b f21_jump2
 //------------------------------------------------------------
 show_boss:
 ldr r1, [sp, #200]
@@ -3241,14 +3301,14 @@ cont_show_boss:
 movs r1, #1
 str r1, [sp, #96]
 
-b ldr_r0_boss
+b ldr_r0_boss_j
 return0:	movs r1, #0 //sayac register
 virusyap:
     	cmp r1, #0
 			bne	atla0
 			ldr	r6, [sp, #208]	//row
 			ldr	r7, [sp, #204] //column
-			b ldr_r3_boss
+			b ldr_r3_boss_j
 return3:	add 	r4, r6, #6		//daire-son konumlar ayarlandı
 			add 	r4, r4, #6
 			add 	r4, r4, #6
@@ -3657,6 +3717,10 @@ atla24:	cmp r1,#24
 							b ret_r3_5
 exit_show_boss_j: b exit_show_boss
 you_win_jump_5: b you_win_s
+ldr_r0_boss_j: b ldr_r0_boss
+ldr_r3_boss_j: b ldr_r3_boss
+return0_j: b return0
+return3_j: b return3
 //-----------------------
 atla25:	cmp r1,#25
 		bne atla26
@@ -3999,131 +4063,131 @@ atla98:	cmp r1,#98
 //--------------------------renklendirme
 atla99:	cmp r1,#99
 		bne atla100
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r7,r7,#4
 		add r6,r6,#7
 		b	kare2
 atla100:cmp r1,#100
 		bne atla101
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r7,r7,#5
 		add r6,r6,#4
 		b	kare2
 atla101:cmp r1,#101
 		bne atla102
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r7,r7,#3
 		add r6,r6,#3
 		b	kare2
 atla102:cmp r1,#102
 		bne atla103
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r7,r7,#1
 		add r6,r6,#5
 		b	kare2
 atla103:cmp r1,#103
 		bne atla104
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r6,r6,#5
 		b	kare2
 atla104:cmp r1,#104
 		bne atla105
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#1
 		add r6,r6,#5
 		b	kare2
 atla105:cmp r1,#105
 		bne atla106
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#2
 		add r6,r6,#3
 		b	kare2
 atla106:cmp r1,#106
 		bne atla107
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#4
 		add r6,r6,#3
 		b	kare2
 atla107:cmp r1,#107
 		bne atla108
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#3
 		sub r6,r6,#4
 		b	kare2
 atla108:cmp r1,#108
 		bne atla109
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r7,r7,#3
 		sub r6,r6,#6
 		b	kare2
 atla109:cmp r1,#109
 		bne atla110
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r7,r7,#4
 		sub r6,r6,#4
 		b	kare2
 atla110:cmp r1,#110
 		bne atla111
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r6,r6,#4
 		b	kare2
 atla111:cmp r1,#111
 		bne atla112
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#2
 		sub r6,r6,#6
 		b	kare2
 atla112:cmp r1,#112
 		bne atla113
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#1
 		sub r6,r6,#8
 		b	kare2
 atla113:cmp r1,#113
 		bne atla114
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#7
 		add r6,r6,#17
 		b	kare2
 atla114:cmp r1,#114
 		bne atla115
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#3
 		sub r6,r6,#16
 		b	kare2
 atla115:cmp r1,#115
 		bne atla116
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#1
 		add r6,r6,#30
 		b	kare2
 atla116:cmp r1,#116
 		bne atla117
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#1
 		sub r6,r6,#21
 		b	kare2
 atla117:cmp r1,#117
 		bne atla118
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#5
 		add r6,r6,#15
 		b	kare2
 atla118:cmp r1,#118
 		bne atla119
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		sub r7,r7,#1
 		sub r6,r6,#4
 		b	kare2
 atla119:cmp r1,#119
 		bne atla120
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#5
 		add r6,r6,#10
 		b	kare2
 atla120:cmp r1,#120
 		bne atla121
-		ldr r3,=0xFFD8E145
+		ldr r3,colorx
 		add r7,r7,#1
 		sub r6,r6,#21
 		b	kare2
@@ -4150,21 +4214,23 @@ back1:	add r6,r6, #1
 		b virusyap
 exit_show_boss:
 		b f17_j5
-ldr_r0_boss:	ldr	r0, =0x40010000
-		b return0
-ldr_r3_boss:	ldr r3, =0xFFB8C125	//sari renk
-		b return3
+//------------------------------------------------------------
+show_explosion_jump_5: b show_explosion
+f21_jump: b f21_jump1
 //------------------------------------------------------------
 .balign 4
 per2: .word 0x40010000
 whi2: .word 0xFFFFFFFF
+colorx: .word 0xFFD8E145
 //------------------------------------------------------------
 you_win_s:
-		ldr	r0, =0x40010000
+		b ldr_r0_win
+ret_win_r0:
 
 		movs	r1, #88
  		movs	r2, #120
-		ldr r3, = 0xFF000000
+		b ldr_r3_win
+ret_win_r3:
  		movs r7, #0
 
 you_win:
@@ -4405,3 +4471,724 @@ z_win:
 		add r3, r3, #1
 		lsl r0, r0, #4
 		b you_win
+//------------------------------------------------------------
+show_explosion:
+		b ldr_r0_exp
+ret_exp_r0:
+		b ldr_r3_exp
+ret_exp_r3:
+		ldr r4, [sp, #200]
+		cmp r4, #0
+		beq cont_exp
+		cmp r4, #2
+		beq exp6_start
+		b show_exp_exit
+
+cont_exp:
+		ldr r4, [sp, #400]
+		cmp r4, #0  //if game did not started yet, exit
+		beq show_exp_exit
+
+		ldr r4, [sp, #12] //extract counter
+
+show_exp_cont:
+		cmp r4, #0
+		beq exp1_start
+		cmp r4, #1
+		beq exp2_start
+		cmp r4, #2
+		beq exp3_start
+		cmp r4, #3
+		beq exp4_start
+		cmp r4, #4
+		beq exp5_start
+		cmp r4, #5
+		beq exp6_start
+		b show_exp_exit
+
+exp1_start:
+		ldr r7, [sp, #92]
+  	cmp r7, #0
+		beq exp_frames_init_1
+		cmp r7, #1
+		beq reset_exp_c_1
+		b lcun_exp
+exp_frames_init_1:
+		ldr r6, [sp, #156]
+		add r6, r6, #1
+		str r6, [sp, #156]
+		movs r1, #75
+		movs r2, #250
+		b exp_frames
+exp2_start:
+		ldr r7, [sp, #88]
+		cmp r7, #0
+		beq exp_frames_init_2
+		cmp r7, #1
+		beq reset_exp_c_2
+		b lcun_exp
+exp_frames_init_2:
+		ldr r6, [sp, #152]
+		add r6, r6, #1
+		str r6, [sp, #152]
+		ldr r1, [sp, #116]
+		ldr r2, [sp, #132]
+		b exp_frames
+exp3_start:
+		ldr r7, [sp, #84]
+		cmp r7, #0
+		beq exp_frames_init_3
+		cmp r7, #1
+		beq reset_exp_c_3
+		b lcun_exp
+exp_frames_init_3:
+		ldr r6, [sp, #148]
+		add r6, r6, #1
+		str r6, [sp, #148]
+		movs r1, #75
+		movs r2, #50
+		b exp_frames
+exp4_start:
+		ldr r7, [sp, #80]
+	 	cmp r7, #0
+		beq exp_frames_init_4
+		cmp r7, #1
+		beq reset_exp_c_4
+		b lcun_exp
+exp_frames_init_4:
+		ldr r6, [sp, #144]
+		add r6, r6, #1
+		str r6, [sp, #144]
+		movs r1, #75
+		movs r2, #150
+		b exp_frames
+exp5_start:
+		ldr r7, [sp, #76]
+		cmp r7, #0
+		beq exp_frames_init_5
+		cmp r7, #1
+		beq reset_exp_c_5
+		b lcun_exp
+exp_frames_init_5:
+		ldr r6, [sp, #140]
+		add r6, r6, #1
+		str r6, [sp, #140]
+		ldr r1, [sp, #112]
+		ldr r2, [sp, #128]
+		b exp_frames
+exp6_start:
+		ldr r7, [sp, #16]
+		cmp r7, #0
+		beq exp_frames_init_6
+		cmp r7, #1
+		beq reset_exp_c_6
+		b lcun_exp
+exp_frames_init_6:
+		ldr r6, [sp, #136]
+		add r6, r6, #1
+		str r6, [sp, #136]
+		ldr r1, [sp, #124]
+		ldr r2, [sp, #120]
+		b exp_frames
+
+exp_frames:
+		cmp r6, #30
+		bls exp_frame1
+		cmp r6, #60
+		bls exp_frame2
+		cmp r6, #90
+		bls exp_frame3
+		b lcun_exp
+exp_frame1:
+		b frame1
+exp_frame2:
+		b frame2
+exp_frame3:
+		b frame3
+
+reset_exp_c_1:
+		movs r7, #0
+		str r7, [sp, #156]
+		b lcun_exp
+reset_exp_c_2:
+		movs r7, #0
+		str r7, [sp, #152]
+		b lcun_exp
+reset_exp_c_3:
+		movs r7, #0
+		str r7, [sp, #148]
+		b lcun_exp
+reset_exp_c_4:
+		movs r7, #0
+		str r7, [sp, #144]
+		b lcun_exp
+reset_exp_c_5:
+		movs r7, #0
+		str r7, [sp, #140]
+		b lcun_exp
+reset_exp_c_6:
+		movs r7, #0
+		str r7, [sp, #136]
+		b lcun_exp
+
+lcun_exp:
+		add r4, r4, #1
+		b show_exp_cont
+
+show_exp_exit:
+		b f21_jump
+//------------------------------------------------------------
+ldr_r0_win: ldr	r0, =0x40010000
+						b ret_win_r0
+ldr_r3_win: ldr r3, = 0xFF000000
+						b ret_win_r3
+ldr_r0_boss:	ldr	r0, =0x40010000
+						b return0_j
+ldr_r3_boss:	ldr r3, =0xFFB8C125	//sari renk
+						b return3_j
+ldr_r0_exp: ldr r0, =0x40010000
+					  b ret_exp_r0
+ldr_r3_exp: ldr r3, =0xFF99004C
+            b ret_exp_r3
+//------------------------------------------------------------
+frame1:	add	r2, r2, #6
+		add	r1, r1, #4
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		str	r3, [r0, #12]	//refresh the screen
+		b show_exp_exit
+//------------------------------------------------------------
+frame2:
+		add r2, r2, #5
+		add r1, r1, #5
+		sub	r1, r1, #4
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		add r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub	r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub	r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		sub r1,r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		str	r3, [r0, #12]	//refresh the screen
+		b show_exp_exit
+//------------------------------------------------------------
+frame3:
+		add r2, r2, #5
+		sub	r1, r1, #5
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+
+		add	r1, r1, #1
+		add r2,r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		add	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		sub r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		add r2, r2, #1
+		sub	r1, r1, #1
+		str	r1, [r0]
+		str	r2, [r0, #4]
+		str	r3, [r0, #8]
+
+		str	r3, [r0, #12]	//refresh the screen
+		b show_exp_exit
+//------------------------------------------------------------
