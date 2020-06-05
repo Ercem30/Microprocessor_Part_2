@@ -125,11 +125,12 @@ start_page:
 
 main_loop:
       str	r3, [r0, #12] //refresh the screen
+			str	r3, [r0, #0x10]
 	   	b show            //show
-			str	r3, [r0, #12] //refresh the screen
+		//	str	r3, [r0, #12] //refresh the screen
 f1:		b update          //update
 main_loop_2:
-      str	r3, [r0, #12] //refresh the screen
+    //  str	r3, [r0, #12] //refresh the screen
 			ldr r7, [sp, #4]
 			cmp r7, #0
 			beq game_over_page
@@ -159,29 +160,33 @@ f12:	b update_player_jump        // -> f4
 f4:		b check_boss_level_jump
 f16:	b update_boss_hit_jump
 f18:	b update_fire_boss_jump
-f19:	str	r3, [r0, #12]
+f19:	//str	r3, [r0, #12]
 			ldr r7, [sp, #32]
 			cmp r7, #10
 		  bhs you_win_page_reset
       b main_loop_2
 show:
-			str	r3, [r0, #12]    //refresh the screen
-			  str	r3, [r0, #0x10]//clear the screen
+		//	str	r3, [r0, #12]    //refresh the screen
+		//	  str	r3, [r0, #0x10]//clear the screen
 			b show_life_points_jump // -> f13
 f13:  b show_charater      // -> f3
-      str	r3, [r0, #12]
+    //  str	r3, [r0, #12]
 f3:		b show_enemy         // -> f8
-      str	r3, [r0, #12]
+    //  str	r3, [r0, #12]
 f8:   ldr r7, [sp, #1012]  //show fire
   		cmp r7, #0
   		bhi show_fire_jj        // -> f5
 f5:   b show_enemy_fire_jump  // -> f11
-f11:  b show_boss_fire_jump
-f20:	b show_boss_jump
-f17:  b show_explosion_jump
-f21:	str	r3, [r0, #12]
+f11: // str	r3, [r0, #12]
+			b show_boss_fire_jump
+f20://	str	r3, [r0, #12]
+			b show_boss_jump
+f17: // str	r3, [r0, #12]
+			b show_explosion_jump
+f21://	str	r3, [r0, #12]
 			b delay                   // -> f6
-f6:   b f1
+f6:   str	r3, [r0, #12]
+ 			b f1
 
 show_fire_jj: b show_fire
 update_fire_j: b update_fire
@@ -377,7 +382,7 @@ ret3:
     sub r5, r5, #1
     cmp r7, #4
     bne draw_fire
-		str	r3, [r0, #12]
+		//str	r3, [r0, #12]
     movs r7, #0
 e_show_fire:
 		b f5
@@ -484,7 +489,7 @@ enemy_cont:
 end_game_enemy:
 
 		movs r7, r2
-		str	r3, [r0, #12]
+		//str	r3, [r0, #12]
 lcun1:
     ldr r7, [sp, #12]
 		add r7, r7, #1
