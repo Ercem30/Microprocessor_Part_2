@@ -1,4 +1,4 @@
-//RAM DATA
+//RAM DATA - base vector - s - offset based mapping
 //window size: 320x240
 //RAM: 1020 -> row value
 //     1016 -> column value
@@ -10,8 +10,8 @@
 //      996 -> enemy 1, is dead? T = 0
 //      992 -> fire 1 pos, row
 //      988 -> fire 2 pos, col
-//			984 -> enemy 2, row position
-//			980 -> enemy 2, col position
+//      984 -> enemy 2, row position
+//      980 -> enemy 2, col position
 //      976 -> enemy 2, is dead
 //      972 -> fire 2 pos, row
 //      968 -> fire 2 pos, col
@@ -31,6 +31,8 @@
 //      912 -> fire 5 pos, row
 //      908 -> fire 5 pos, col
 
+//      400 -> game started = 0/1
+
 //      208 -> boss row pos
 //      204 -> boss col pos
 //      200 -> boss is present
@@ -44,6 +46,18 @@
 //      168 -> boss laser on/off = 1/0
 
 //      160 -> end timer
+//      156 -> enemy 1, boom counter
+//      152 -> enemy 2, boom counter
+//      148 -> enemy 3, boom counter
+//      144 -> enemy 4, boom counter
+//      140 -> enemy 5, boom counter
+//      136 -> player, boom counter
+//      132 -> enemy2, col exp
+//      128 -> enemy5, col exp
+//      124 -> player, row exp
+//      120 -> player, col exp
+//      116 -> enemy2, row exp
+//      112 -> enemy5, row exp
 
 //      104 -> counter, enemy 2
 //      100 -> counter, enemy 1
@@ -62,4 +76,4 @@
 //       12 -> local counter
 //        8 -> timer
 //        4 -> life points
-//       current state: f20
+//       current state: f21
